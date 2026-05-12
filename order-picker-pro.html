@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Picker Pro">
+<title>Order Picker Pro</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --black: #0f0f0f;
+    --white: #fafafa;
+    --yellow: #f5c400;
+    --yellow-dark: #c49a00;
+    --green: #1a7a3e;
+    --green-light: #e8f5ee;
+    --grey-50: #fafafa;
+    --grey-100: #f4f4f4;
+    --grey-200: #e8e8e8;
+    --grey-300: #d0d0d0;
+    --grey-400: #aaa;
+    --grey-600: #666;
+    --grey-800: #333;
+    --red: #c0392b;
+    --radius: 12px;
+    --shadow: 0 2px 8px rgba(0,0,0,0.08);
+    --shadow-lg: 0 4px 20px rgba(0,0,0,0.14);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--grey-100);
+    color: var(--grey-800);
+    min-height: 100vh;
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  /* ── HEADER ── */
+  #header {
+    background: var(--black);
+    padding: 12px 16px;
+    padding-top: calc(12px + env(safe-area-inset-top));
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    position: sticky;
+    top: 0;
+    z-index: 200;
+    border-bottom: 3px solid var(--yellow);
+  }
+
+  #header h1 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 24px;
+    color: var(--yellow);
+    letter-spacing: 2px;
+    line-height: 1;
+  }
+
+  .pro-badge {
+    background: var(--yellow);
+    color: var(--black);
+    font-size: 9px;
+    font-weight: 700;
+    padding: 2px 5px;
+    border-radius: 3px;
+    letter-spacing: 1px;
+  }
+
+  #header-right {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .header-btn {
+    padding: 6px 12px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    display: none;
+  }
+  .header-btn.yellow { background: var(--yellow); color: var(--black); }
+  .header-btn.grey { background: var(--grey-200); color: var(--grey-800); }
+
+  /* ── SEARCH ── */
+  #search-bar {
+    display: none;
+    padding: 10px 16px;
+    background: var(--white);
+    border-bottom: 1px solid var(--grey-200);
+    position: sticky;
+    top: calc(51px + env(safe-area-inset-top));
+    z-index: 150;
+  }
+
+  #search-input {
+    width: 100%;
+    padding: 10px 16px 10px 40px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 16px;
+    border: 1.5px solid var(--grey-300);
+    border-radius: 10px;
+    background: var(--grey-50);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23aaa' stroke-width='2'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: 12px center;
+    color: var(--grey-800);
+    outline: none;
+  }
+  #search-input:focus { border-color: var(--yellow); }
+
+  /* ── STATS ── */
+  #stats-bar {
+    display: none;
+    background: var(--white);
+    border-bottom: 1px solid var(--grey-200);
+    padding: 8px 16px;
+    gap: 16px;
+    align-items: center;
+    font-size: 13px;
+    color: var(--grey-600);
+    flex-wrap: wrap;
+  }
+  #stats-bar strong { color: var(--grey-800); }
+
+  #progress-bar-wrap {
+    width: 100%;
+    height: 4px;
+    background: var(--grey-200);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  #progress-bar {
+    height: 100%;
+    background: var(--yellow);
+    border-radius: 2px;
+    transition: width 0.3s ease;
+    width: 0%;
+  }
+
+  /* ── AUTH ── */
+  #auth-screen {
+    padding: 40px 24px;
+    text-align: center;
+  }
+
+  .auth-card {
+    background: var(--white);
+    border-radius: var(--radius);
+    padding: 32px 24px;
+    box-shadow: var(--shadow-lg);
+  }
+
+  .auth-card .icon { font-size: 48px; margin-bottom: 16px; }
+  .auth-card h2 { font-family: 'Bebas Neue', sans-serif; font-size: 26px; letter-spacing: 1px; margin-bottom: 8px; }
+  .auth-card p { color: var(--grey-600); font-size: 14px; margin-bottom: 24px; line-height: 1.6; }
+
+  .auth-btn {
+    display: block;
+    width: 100%;
+    padding: 14px;
+    background: var(--yellow);
+    color: var(--black);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    margin-bottom: 12px;
+  }
+
+  .auth-status { font-size: 13px; color: var(--grey-600); margin-top: 10px; }
+  .auth-status.connected { color: var(--green); font-weight: 600; }
+  .auth-status.error { color: var(--red); }
+
+  /* ── LOADING ── */
+  #loading-screen {
+    display: none;
+    text-align: center;
+    padding: 80px 24px;
+  }
+
+  .spinner {
+    width: 36px;
+    height: 36px;
+    border: 3px solid var(--grey-200);
+    border-top-color: var(--yellow);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    margin: 0 auto 16px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loading-text { font-family: 'Bebas Neue', sans-serif; font-size: 18px; letter-spacing: 1px; color: var(--grey-600); }
+
+  /* ── MAIN ── */
+  #main { display: none; padding: 12px 16px 40px; }
+
+  /* ── PICK CARD ── */
+  .pick-card {
+    background: var(--white);
+    border-radius: var(--radius);
+    margin-bottom: 12px;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    border-left: 4px solid var(--yellow);
+    transition: opacity 0.3s, transform 0.3s;
+  }
+
+  .pick-card.picked {
+    opacity: 0.35;
+    border-left-color: var(--green);
+  }
+
+  .pick-card.picked .card-body { display: none; }
+  .pick-card.picked .picked-bar { display: flex; }
+  .pick-card.search-hidden { display: none; }
+
+  .picked-bar {
+    display: none;
+    padding: 12px 16px;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+  }
+
+  .picked-bar-left { display: flex; align-items: center; gap: 10px; }
+  .picked-tick { font-size: 18px; }
+  .picked-name { font-weight: 600; font-size: 14px; color: var(--grey-600); }
+  .picked-shelf { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--grey-400); background: var(--grey-100); padding: 2px 6px; border-radius: 4px; }
+  .unpick-btn { font-size: 11px; padding: 4px 10px; border: 1px solid var(--grey-300); border-radius: 6px; background: var(--white); color: var(--grey-600); cursor: pointer; }
+
+  .card-body { padding: 0; }
+
+  /* ── IMAGE ── */
+  .item-image-wrap {
+    width: 100%;
+    background: var(--grey-50);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-bottom: 1px solid var(--grey-100);
+    min-height: 200px;
+    position: relative;
+  }
+
+  .item-image {
+    width: 100%;
+    max-height: 280px;
+    object-fit: contain;
+    display: block;
+  }
+
+  .item-image-placeholder {
+    font-size: 64px;
+    padding: 40px;
+    color: var(--grey-300);
+  }
+
+  /* ── ITEM INFO ── */
+  .item-info {
+    padding: 14px 16px;
+  }
+
+  .item-shelf-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+
+  .shelf-tag {
+    background: var(--black);
+    color: var(--yellow);
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 6px;
+    letter-spacing: 0.5px;
+  }
+
+  .item-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--grey-800);
+    line-height: 1.4;
+    margin-bottom: 6px;
+  }
+
+  .item-buyer {
+    font-size: 13px;
+    color: var(--grey-600);
+    margin-bottom: 4px;
+  }
+
+  .item-postage {
+    font-size: 12px;
+    color: var(--grey-400);
+    font-family: 'DM Mono', monospace;
+  }
+
+  /* ── PICK BUTTON ── */
+  .pick-btn {
+    display: block;
+    width: calc(100% - 32px);
+    margin: 0 16px 16px;
+    padding: 16px;
+    background: var(--yellow);
+    color: var(--black);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    text-align: center;
+    transition: background 0.15s, transform 0.1s;
+    letter-spacing: 0.3px;
+  }
+  .pick-btn:active { transform: scale(0.97); background: #ffd700; }
+
+  /* ── ALL DONE ── */
+  #all-done {
+    display: none;
+    text-align: center;
+    padding: 60px 24px;
+  }
+  #all-done .done-icon { font-size: 64px; margin-bottom: 16px; }
+  #all-done h2 { font-family: 'Bebas Neue', sans-serif; font-size: 32px; letter-spacing: 1px; color: var(--green); margin-bottom: 8px; }
+  #all-done p { color: var(--grey-600); font-size: 14px; }
+
+  /* ── ERROR ── */
+  #error-bar {
+    display: none;
+    background: #fdf0ef;
+    border: 1px solid #f5c6c2;
+    border-radius: 8px;
+    margin: 16px;
+    padding: 12px 16px;
+    font-size: 13px;
+    color: var(--red);
+  }
+</style>
+</head>
+<body>
+
+<div id="header">
+  <div style="display:flex;align-items:center;gap:8px;">
+    <h1>🎮 Order Picker</h1>
+    <span class="pro-badge">PRO</span>
+  </div>
+  <div id="header-right">
+    <button class="header-btn grey" id="refresh-btn" onclick="loadOrders()">↻</button>
+    <button class="header-btn yellow" id="reset-btn" onclick="resetPicked()">Reset</button>
+  </div>
+</div>
+
+<div id="search-bar">
+  <input type="text" id="search-input" placeholder="Search title, shelf, buyer..." oninput="runSearch(this.value)">
+</div>
+
+<div id="stats-bar">
+  <span>To pick: <strong id="stat-remaining">0</strong></span>
+  <span style="color:var(--green)">✓ Picked: <strong id="stat-picked">0</strong></span>
+  <span>Total: <strong id="stat-total">0</strong></span>
+  <div id="progress-bar-wrap"><div id="progress-bar"></div></div>
+</div>
+
+<div id="auth-screen">
+  <div class="auth-card">
+    <div class="icon">📦</div>
+    <h2>Order Picker Pro</h2>
+    <p>Sign in with your eBay account to load today's orders sorted by shelf location.</p>
+    <button class="auth-btn" onclick="startAuth()">Sign in with eBay</button>
+    <div class="auth-status" id="auth-status">Not connected</div>
+  </div>
+</div>
+
+<div id="loading-screen">
+  <div class="spinner"></div>
+  <div class="loading-text">Loading orders...</div>
+</div>
+
+<div id="error-bar"></div>
+
+<div id="main"></div>
+
+<div id="all-done">
+  <div class="done-icon">🎉</div>
+  <h2>All Picked!</h2>
+  <p>Every item has been picked. Time to pack!</p>
+</div>
+
+<script>
+// ── CONFIG ──
+const APP_ID   = 'GameJunk-GameJunk-PRD-c18349980-84e54bfe';
+const CERT_ID  = 'PRD-183ec2e3ce33-b3b0-4425-b93d-ad76';
+const RU_NAME  = 'Game_Junkie-GameJunk-GameJu-qemcvtfkv';
+const CALLBACK = 'https://shane0229.github.io/gamejunkie-packer/callback.html';
+const PROXY    = 'http://localhost:3747';
+
+const SCOPES = [
+  'https://api.ebay.com/oauth/api_scope',
+  'https://api.ebay.com/oauth/api_scope/sell.fulfillment',
+  'https://api.ebay.com/oauth/api_scope/sell.fulfillment.readonly'
+].join('%20');
+
+// ── STATE ──
+let accessToken = null;
+let refreshToken = localStorage.getItem('gj_refresh_token');
+let allItems = [];
+let pickedIds = new Set(JSON.parse(localStorage.getItem('gj_picked') || '[]'));
+
+// ── AUTH ──
+function startAuth() {
+  const authUrl = `https://auth.ebay.com/oauth2/authorize?client_id=${APP_ID}&redirect_uri=${encodeURIComponent(RU_NAME)}&response_type=code&scope=${SCOPES}&prompt=login`;
+  const popup = window.open(authUrl, 'ebay_auth', 'width=600,height=700');
+  setStatus('Waiting for eBay sign-in...', '');
+
+  const poll = setInterval(async () => {
+    try {
+      if (!popup || popup.closed) { clearInterval(poll); setStatus('Sign-in closed.', 'error'); return; }
+      let href = '';
+      try { href = popup.location.href; } catch(e) { return; }
+      if (href.includes('shane0229.github.io') && href.includes('code=')) {
+        clearInterval(poll);
+        const code = new URLSearchParams(new URL(href).search).get('code');
+        try { popup.close(); } catch(e) {}
+        if (code) { setStatus('Connecting...', ''); await exchangeToken(code); }
+      }
+    } catch(e) {}
+  }, 500);
+
+  window.addEventListener('message', async function handler(e) {
+    const data = e.data ? e.data.toString() : '';
+    if (!data.includes('code=')) return;
+    clearInterval(poll);
+    window.removeEventListener('message', handler);
+    try { popup.close(); } catch(e) {}
+    const code = new URLSearchParams(data.startsWith('?') ? data.slice(1) : data).get('code');
+    if (code) { setStatus('Connecting...', ''); await exchangeToken(code); }
+  });
+}
+
+async function exchangeToken(code) {
+  try {
+    const resp = await fetch(`${PROXY}/token`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ code })
+    });
+    const data = await resp.json();
+    if (data.access_token) {
+      accessToken = data.access_token;
+      if (data.refresh_token) { refreshToken = data.refresh_token; localStorage.setItem('gj_refresh_token', refreshToken); }
+      setStatus('✅ Connected!', 'connected');
+      setTimeout(() => loadOrders(), 500);
+    } else {
+      setStatus('Auth failed: ' + (data.error_description || JSON.stringify(data)), 'error');
+    }
+  } catch(e) { setStatus('Connection error: ' + e.message, 'error'); }
+}
+
+async function refreshAccessToken() {
+  if (!refreshToken) return false;
+  try {
+    const resp = await fetch(`${PROXY}/refresh`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ refresh_token: refreshToken })
+    });
+    const data = await resp.json();
+    if (data.access_token) { accessToken = data.access_token; return true; }
+    return false;
+  } catch(e) { return false; }
+}
+
+function setStatus(msg, cls) {
+  const el = document.getElementById('auth-status');
+  el.textContent = msg;
+  el.className = 'auth-status' + (cls ? ' ' + cls : '');
+}
+
+// ── LOAD ORDERS ──
+async function loadOrders() {
+  if (!accessToken && refreshToken) {
+    showLoading('Reconnecting...');
+    const ok = await refreshAccessToken();
+    if (!ok) { showAuth(); setStatus('Session expired — please sign in again.', 'error'); return; }
+  }
+  if (!accessToken) { showAuth(); return; }
+
+  showLoading('Loading orders...');
+
+  try {
+    let orders = [];
+    let offset = 0;
+    const limit = 200;
+    let hasMore = true;
+
+    while (hasMore) {
+      const resp = await fetch(`${PROXY}/orders`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ access_token: accessToken, offset, limit })
+      });
+
+      if (resp.status === 401) {
+        const ok = await refreshAccessToken();
+        if (!ok) { showAuth(); return; }
+        continue;
+      }
+
+      const data = await resp.json();
+      if (data.errors || !data.orders || data.orders.length === 0) { hasMore = false; break; }
+      orders = orders.concat(data.orders);
+      offset += data.orders.length;
+      if (orders.length >= (data.total || 0)) hasMore = false;
+    }
+
+    processOrders(orders);
+  } catch(e) {
+    showError('Failed to load: ' + e.message);
+  }
+}
+
+// ── PROCESS ──
+function processOrders(orders) {
+  allItems = [];
+
+  orders.forEach(order => {
+    const shipping = order.fulfillmentStartInstructions?.[0]?.shippingStep;
+    const buyerName = titleCase(shipping?.shipTo?.fullName || order.buyer?.username || '');
+
+    (order.lineItems || []).forEach(item => {
+      allItems.push({
+        id: item.lineItemId || (order.orderId + '_' + item.legacyItemId),
+        title: item.title || '',
+        shelf: item.sku || item.customLabel || '',
+        itemId: item.legacyItemId || '',
+        imageUrl: item.lineItemImageUrl || '',
+        postage: shipping?.shippingServiceCode || '',
+        buyer: buyerName,
+        orderId: order.orderId || ''
+      });
+    });
+  });
+
+  // Sort by shelf location
+  allItems.sort((a, b) => {
+    const ka = locationSortKey(parseLocation(a.shelf));
+    const kb = locationSortKey(parseLocation(b.shelf));
+    return ka < kb ? -1 : ka > kb ? 1 : 0;
+  });
+
+  renderItems();
+  fetchImages();
+}
+
+// ── RENDER ──
+function renderItems() {
+  const main = document.getElementById('main');
+
+  main.innerHTML = allItems.map((item, idx) => {
+    const isPicked = pickedIds.has(item.id);
+    return `
+      <div class="pick-card ${isPicked ? 'picked' : ''}" id="card-${idx}">
+        <div class="picked-bar" onclick="unpick(${idx})">
+          <div class="picked-bar-left">
+            <span class="picked-tick">✅</span>
+            <span class="picked-name">${esc(item.title.substring(0, 40))}${item.title.length > 40 ? '...' : ''}</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            ${item.shelf ? `<span class="picked-shelf">${esc(item.shelf)}</span>` : ''}
+            <button class="unpick-btn">↩ Unpick</button>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="item-image-wrap" id="img-wrap-${idx}">
+            ${item.imageUrl
+              ? `<img class="item-image" src="${esc(item.imageUrl)}" alt="" loading="lazy" onerror="this.parentNode.innerHTML='<div class=item-image-placeholder>📀</div>'">`
+              : `<div class="item-image-placeholder">📀</div>`}
+          </div>
+          <div class="item-info">
+            <div class="item-shelf-row">
+              ${item.shelf ? `<span class="shelf-tag">${esc(item.shelf)}</span>` : ''}
+            </div>
+            <div class="item-title">${esc(item.title)}</div>
+            <div class="item-buyer">👤 ${esc(item.buyer)}</div>
+            <div class="item-postage">${esc(item.postage || 'Untracked')}</div>
+          </div>
+          <button class="pick-btn" onclick="pickItem(${idx})">✓ Picked</button>
+        </div>
+      </div>`;
+  }).join('');
+
+  updateStats();
+  showMain();
+}
+
+// ── PICK / UNPICK ──
+function pickItem(idx) {
+  const item = allItems[idx];
+  if (!item) return;
+  pickedIds.add(item.id);
+  savePicked();
+
+  const card = document.getElementById('card-' + idx);
+  if (card) card.classList.add('picked');
+
+  updateStats();
+  checkAllDone();
+}
+
+function unpick(idx) {
+  const item = allItems[idx];
+  if (!item) return;
+  pickedIds.delete(item.id);
+  savePicked();
+
+  const card = document.getElementById('card-' + idx);
+  if (card) card.classList.remove('picked');
+
+  document.getElementById('all-done').style.display = 'none';
+  document.getElementById('main').style.display = 'block';
+  updateStats();
+}
+
+function resetPicked() {
+  if (!confirm('Reset all picked items?')) return;
+  pickedIds.clear();
+  savePicked();
+  document.querySelectorAll('.pick-card').forEach(c => c.classList.remove('picked'));
+  document.getElementById('all-done').style.display = 'none';
+  document.getElementById('main').style.display = 'block';
+  updateStats();
+}
+
+function savePicked() {
+  localStorage.setItem('gj_picked', JSON.stringify([...pickedIds]));
+}
+
+function checkAllDone() {
+  if (pickedIds.size >= allItems.length && allItems.length > 0) {
+    document.getElementById('main').style.display = 'none';
+    document.getElementById('all-done').style.display = 'block';
+  }
+}
+
+// ── STATS ──
+function updateStats() {
+  const total = allItems.length;
+  const picked = pickedIds.size;
+  const remaining = total - picked;
+  document.getElementById('stat-total').textContent = total;
+  document.getElementById('stat-picked').textContent = picked;
+  document.getElementById('stat-remaining').textContent = remaining;
+  document.getElementById('progress-bar').style.width = total > 0 ? (picked / total * 100) + '%' : '0%';
+}
+
+// ── SEARCH ──
+function runSearch(query) {
+  const q = query.trim().toLowerCase();
+  document.querySelectorAll('.pick-card').forEach(card => {
+    if (!q) { card.classList.remove('search-hidden'); return; }
+    card.classList.toggle('search-hidden', !card.textContent.toLowerCase().includes(q));
+  });
+}
+
+// ── FETCH IMAGES ──
+async function fetchImages() {
+  const needsImage = allItems.map((item, idx) => ({ ...item, idx })).filter(item => !item.imageUrl && item.itemId);
+  if (!needsImage.length) return;
+
+  for (let i = 0; i < needsImage.length; i += 5) {
+    const batch = needsImage.slice(i, i + 5);
+    await Promise.all(batch.map(async item => {
+      try {
+        const resp = await fetch(`${PROXY}/image`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ access_token: accessToken, item_id: item.itemId })
+        });
+        const data = await resp.json();
+        if (data.imageUrl) {
+          allItems[item.idx].imageUrl = data.imageUrl;
+          const wrap = document.getElementById('img-wrap-' + item.idx);
+          if (wrap) wrap.innerHTML = `<img class="item-image" src="${esc(data.imageUrl)}" alt="" loading="lazy" onerror="this.parentNode.innerHTML='<div class=item-image-placeholder>📀</div>'">`;
+        }
+      } catch(e) {}
+    }));
+  }
+}
+
+// ── LOCATION SORT ──
+function parseLocation(sku) {
+  if (!sku) return { type: 'unknown', raw: sku || '' };
+  const bs = sku.match(/^B(\d+)\s+S(\d+)(?:\s+R(\d+))?$/i);
+  if (bs) return { type: 'bookshelf', b: parseInt(bs[1]), s: parseInt(bs[2]), r: parseInt(bs[3]||0), raw: sku };
+  const box = sku.match(/^([A-Z]+)(\d+)$/i);
+  if (box) return { type: 'box', letter: box[1].toUpperCase(), num: parseInt(box[2]), raw: sku };
+  return { type: 'unknown', raw: sku };
+}
+
+function locationSortKey(loc) {
+  if (loc.type === 'box') return '0' + loc.letter.padStart(3,' ') + String(loc.num).padStart(4,'0');
+  if (loc.type === 'bookshelf') return '1' + String(loc.b).padStart(3,'0') + String(loc.s).padStart(3,'0') + String(loc.r).padStart(3,'0');
+  return '2' + loc.raw;
+}
+
+// ── UTILS ──
+function titleCase(str) {
+  if (!str) return '';
+  const UPPER = new Set(['NSW','VIC','QLD','SA','WA','TAS','NT','ACT','PO','GPO']);
+  const LOWER = new Set(['a','an','the','and','or','of','to','in','on','at','by','for']);
+  return str.toLowerCase().replace(/\S+/g, (word, offset) => {
+    const clean = word.replace(/[^a-z]/gi,'').toUpperCase();
+    if (UPPER.has(clean)) return clean;
+    if (offset > 0 && LOWER.has(word)) return word;
+    return word.charAt(0).toUpperCase() + word.slice(1);
+  });
+}
+
+function esc(str) {
+  if (!str) return '';
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ── SCREENS ──
+function showAuth() {
+  document.getElementById('auth-screen').style.display = 'block';
+  document.getElementById('loading-screen').style.display = 'none';
+  document.getElementById('main').style.display = 'none';
+  document.getElementById('stats-bar').style.display = 'none';
+  document.getElementById('search-bar').style.display = 'none';
+  document.getElementById('all-done').style.display = 'none';
+  ['refresh-btn','reset-btn'].forEach(id => document.getElementById(id).style.display = 'none');
+}
+
+function showLoading(msg) {
+  document.getElementById('auth-screen').style.display = 'none';
+  document.getElementById('loading-screen').style.display = 'block';
+  document.getElementById('loading-screen').querySelector('.loading-text').textContent = msg;
+  document.getElementById('main').style.display = 'none';
+  document.getElementById('stats-bar').style.display = 'none';
+  document.getElementById('search-bar').style.display = 'none';
+  document.getElementById('all-done').style.display = 'none';
+}
+
+function showMain() {
+  document.getElementById('auth-screen').style.display = 'none';
+  document.getElementById('loading-screen').style.display = 'none';
+  document.getElementById('error-bar').style.display = 'none';
+  document.getElementById('stats-bar').style.display = 'flex';
+  document.getElementById('search-bar').style.display = 'block';
+  document.getElementById('main').style.display = 'block';
+  ['refresh-btn','reset-btn'].forEach(id => document.getElementById(id).style.display = 'block');
+  checkAllDone();
+}
+
+function showError(msg) {
+  document.getElementById('loading-screen').style.display = 'none';
+  const bar = document.getElementById('error-bar');
+  bar.textContent = '⚠ ' + msg;
+  bar.style.display = 'block';
+  showAuth();
+}
+
+// ── INIT ──
+if (refreshToken) {
+  showLoading('Reconnecting...');
+  refreshAccessToken().then(ok => {
+    if (ok) loadOrders();
+    else { showAuth(); setStatus('Session expired — please sign in again.', 'error'); }
+  });
+}
+</script>
+</body>
+</html>
