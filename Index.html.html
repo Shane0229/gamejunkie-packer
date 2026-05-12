@@ -1,0 +1,1151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GameJunkie Packer Pro</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --black: #0f0f0f;
+    --white: #fafafa;
+    --yellow: #f5c400;
+    --yellow-dark: #c49a00;
+    --green: #1a7a3e;
+    --green-light: #e8f5ee;
+    --red: #c0392b;
+    --orange: #e07b00;
+    --orange-light: #fff4e0;
+    --blue: #1a5fa8;
+    --blue-light: #e8f0fa;
+    --grey-50: #fafafa;
+    --grey-100: #f4f4f4;
+    --grey-200: #e8e8e8;
+    --grey-300: #d0d0d0;
+    --grey-400: #aaa;
+    --grey-600: #666;
+    --grey-800: #333;
+    --radius: 10px;
+    --shadow: 0 2px 8px rgba(0,0,0,0.08);
+    --shadow-lg: 0 4px 20px rgba(0,0,0,0.12);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--grey-100);
+    color: var(--grey-800);
+    min-height: 100vh;
+  }
+
+  /* ── HEADER ── */
+  #header {
+    background: var(--black);
+    padding: 0 24px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    height: 56px;
+    position: sticky;
+    top: 0;
+    z-index: 200;
+    border-bottom: 3px solid var(--yellow);
+  }
+
+  #header h1 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 26px;
+    color: var(--yellow);
+    letter-spacing: 2px;
+    line-height: 1;
+  }
+
+  #header .pro-badge {
+    background: var(--yellow);
+    color: var(--black);
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 6px;
+    border-radius: 3px;
+    letter-spacing: 1px;
+    margin-top: 2px;
+  }
+
+  #header-right {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .header-btn {
+    padding: 7px 16px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: opacity 0.15s;
+    display: none;
+  }
+  .header-btn:hover { opacity: 0.85; }
+  .header-btn.yellow { background: var(--yellow); color: var(--black); }
+  .header-btn.green { background: var(--green); color: #fff; }
+
+  /* ── AUTH SCREEN ── */
+  #auth-screen {
+    max-width: 480px;
+    margin: 60px auto;
+    padding: 0 24px;
+  }
+
+  .auth-card {
+    background: var(--white);
+    border-radius: var(--radius);
+    padding: 40px;
+    box-shadow: var(--shadow-lg);
+    text-align: center;
+  }
+
+  .auth-card .icon { font-size: 48px; margin-bottom: 16px; }
+  .auth-card h2 { font-family: 'Bebas Neue', sans-serif; font-size: 28px; letter-spacing: 1px; margin-bottom: 8px; }
+  .auth-card p { color: var(--grey-600); font-size: 14px; margin-bottom: 28px; line-height: 1.6; }
+
+  .auth-btn {
+    display: inline-block;
+    width: 100%;
+    padding: 14px;
+    background: var(--yellow);
+    color: var(--black);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background 0.15s;
+    margin-bottom: 12px;
+  }
+  .auth-btn:hover { background: #ffd700; }
+
+  .auth-status {
+    font-size: 13px;
+    color: var(--grey-600);
+    margin-top: 12px;
+  }
+
+  .auth-status.connected { color: var(--green); font-weight: 600; }
+  .auth-status.error { color: var(--red); }
+
+  /* ── LOADING ── */
+  #loading-screen {
+    display: none;
+    text-align: center;
+    padding: 80px 24px;
+  }
+
+  .spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid var(--grey-200);
+    border-top-color: var(--yellow);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    margin: 0 auto 20px;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .loading-text {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 20px;
+    letter-spacing: 1px;
+    color: var(--grey-600);
+  }
+
+  /* ── STATS BAR ── */
+  #stats-bar {
+    display: none;
+    background: var(--white);
+    border-bottom: 1px solid var(--grey-200);
+    padding: 8px 24px;
+    gap: 20px;
+    align-items: center;
+    font-size: 13px;
+    color: var(--grey-600);
+    flex-wrap: wrap;
+  }
+
+  #stats-bar strong { color: var(--grey-800); }
+  #stats-bar .stat-parcel { color: var(--orange); }
+  #stats-bar .stat-parcel strong { color: var(--orange); }
+
+  #stats-bar .refresh-btn {
+    margin-left: auto;
+    padding: 5px 12px;
+    background: var(--grey-100);
+    border: 1px solid var(--grey-300);
+    border-radius: 5px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    color: var(--grey-600);
+    transition: background 0.15s;
+  }
+  #stats-bar .refresh-btn:hover { background: var(--grey-200); }
+
+  /* ── MAIN ── */
+  #main { display: none; padding: 0 0 60px; }
+
+  /* ── SECTIONS ── */
+  .section {
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--grey-200);
+  }
+
+  .section-heading {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 15px;
+    letter-spacing: 1.5px;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .section-heading.yellow { color: var(--yellow-dark); }
+  .section-heading.orange { color: var(--orange); }
+  .section-heading.grey { color: var(--grey-400); }
+
+  /* ── BUYER CARD ── */
+  .buyer-card {
+    background: var(--white);
+    border-radius: var(--radius);
+    margin-bottom: 12px;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    border-left: 4px solid var(--grey-300);
+    transition: box-shadow 0.15s;
+  }
+  .buyer-card:hover { box-shadow: var(--shadow-lg); }
+  .buyer-card.multi { border-left-color: var(--yellow); }
+  .buyer-card.parcel { border-left-color: var(--orange); }
+  .buyer-card.single { border-left-color: var(--grey-300); }
+
+  .buyer-card.collapsed { opacity: 0.45; }
+  .buyer-card.collapsed .card-body { display: none; }
+  .buyer-card.collapsed .collapsed-bar { display: flex; }
+
+  .collapsed-bar {
+    display: none;
+    padding: 10px 16px;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+    font-size: 13px;
+  }
+  .collapsed-bar:hover { background: var(--grey-50); }
+  .collapsed-name { font-weight: 600; color: var(--grey-800); margin-right: 8px; }
+  .collapsed-addr { color: var(--grey-400); font-size: 12px; }
+  .expand-btn {
+    font-size: 11px;
+    padding: 3px 10px;
+    border: 1px solid var(--grey-300);
+    border-radius: 4px;
+    background: var(--white);
+    color: var(--grey-600);
+    cursor: pointer;
+    white-space: nowrap;
+  }
+
+  .card-body {
+    display: grid;
+    grid-template-columns: 1fr 280px;
+  }
+
+  /* ── LEFT PANEL ── */
+  .items-panel {
+    padding: 14px 18px;
+    border-right: 1px solid var(--grey-200);
+  }
+
+  .buyer-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 4px;
+    flex-wrap: wrap;
+  }
+
+  .buyer-name {
+    font-weight: 700;
+    font-size: 15px;
+    color: var(--grey-800);
+  }
+
+  .badge {
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 20px;
+    letter-spacing: 0.3px;
+  }
+
+  .badge-count { background: var(--yellow); color: var(--black); }
+  .badge-parcel { background: var(--orange); color: #fff; }
+  .badge-oversize { background: var(--orange); color: #fff; }
+
+  .buyer-addr {
+    font-size: 12px;
+    color: var(--grey-400);
+    margin-bottom: 10px;
+    font-family: 'DM Mono', monospace;
+  }
+
+  /* ── THUMBNAIL ── */
+  .item-list { list-style: none; }
+
+  .item-row {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    padding: 8px 0;
+    border-top: 1px solid var(--grey-100);
+  }
+  .item-row:first-child { border-top: none; }
+
+  .item-thumb {
+    width: 48px;
+    height: 48px;
+    object-fit: cover;
+    border-radius: 5px;
+    background: var(--grey-100);
+    flex-shrink: 0;
+    border: 1px solid var(--grey-200);
+  }
+
+  .item-thumb-placeholder {
+    width: 48px;
+    height: 48px;
+    background: var(--grey-100);
+    border-radius: 5px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    border: 1px solid var(--grey-200);
+  }
+
+  .item-info { flex: 1; min-width: 0; }
+
+  .shelf-tag {
+    background: var(--grey-100);
+    color: var(--yellow-dark);
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: 'DM Mono', monospace;
+    margin-right: 6px;
+    flex-shrink: 0;
+  }
+
+  .item-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--grey-800);
+    line-height: 1.4;
+    text-decoration: none;
+  }
+  a.item-title { border-bottom: 1px dashed var(--grey-300); }
+  a.item-title:hover { color: var(--yellow-dark); border-bottom-color: var(--yellow-dark); }
+
+  .item-postage {
+    font-size: 11px;
+    color: var(--grey-400);
+    margin-top: 2px;
+    font-family: 'DM Mono', monospace;
+  }
+  .item-postage .parcel-label { color: var(--orange); font-weight: 700; }
+
+  .buyer-note {
+    margin-top: 10px;
+    padding: 8px 12px;
+    background: #fffbe6;
+    border-left: 3px solid var(--yellow);
+    border-radius: 0 6px 6px 0;
+    font-size: 12px;
+    color: var(--grey-800);
+    line-height: 1.5;
+  }
+  .buyer-note strong {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--grey-400);
+    display: block;
+    margin-bottom: 2px;
+  }
+
+  /* ── RIGHT PANEL ── */
+  .label-panel {
+    padding: 14px 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    background: var(--grey-50);
+  }
+
+  .label-preview {
+    width: 248px;
+    height: 133px;
+    background: var(--white);
+    border: 1px solid var(--grey-300);
+    border-radius: 5px;
+    padding: 10px 12px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    position: relative;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  }
+
+  .label-from {
+    font-size: 8px;
+    color: var(--grey-400);
+    font-family: 'DM Mono', monospace;
+    line-height: 1.4;
+  }
+
+  .label-divider {
+    border: none;
+    border-top: 0.5px solid var(--grey-200);
+    margin: 3px 0;
+  }
+
+  .label-to-name {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--black);
+    line-height: 1.2;
+  }
+
+  .label-to-addr {
+    font-size: 11px;
+    color: var(--grey-600);
+    line-height: 1.5;
+    margin-top: 2px;
+    font-family: 'DM Mono', monospace;
+  }
+
+  .label-item-count {
+    position: absolute;
+    top: 7px;
+    right: 8px;
+    font-size: 9px;
+    font-weight: 700;
+    background: var(--yellow);
+    color: var(--black);
+    padding: 2px 6px;
+    border-radius: 3px;
+  }
+
+  /* ── ACTION BUTTONS ── */
+  .action-btn {
+    width: 100%;
+    padding: 8px 0;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    border-radius: 6px;
+    cursor: pointer;
+    border: none;
+    transition: opacity 0.15s, background 0.15s;
+    text-align: center;
+    text-decoration: none;
+    display: block;
+  }
+  .action-btn:hover { opacity: 0.88; }
+
+  .btn-shipped {
+    background: var(--green);
+    color: #fff;
+  }
+  .btn-shipped.done {
+    background: var(--grey-200);
+    color: var(--grey-400);
+    cursor: default;
+  }
+
+  .btn-copy {
+    background: var(--yellow);
+    color: var(--black);
+  }
+  .btn-copy.copied {
+    background: var(--green);
+    color: #fff;
+  }
+
+  .btn-edit {
+    background: var(--white);
+    color: var(--grey-600);
+    border: 1px solid var(--grey-300) !important;
+  }
+
+  .parcel-note {
+    font-size: 11px;
+    color: var(--grey-400);
+    text-align: center;
+    line-height: 1.4;
+  }
+
+  /* ── EDIT FORM ── */
+  .edit-form {
+    width: 100%;
+    display: none;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .edit-form.open { display: flex; }
+  .edit-form input {
+    width: 100%;
+    padding: 6px 8px;
+    font-size: 12px;
+    font-family: 'DM Sans', sans-serif;
+    border: 1px solid var(--grey-300);
+    border-radius: 5px;
+    background: var(--white);
+    color: var(--grey-800);
+  }
+  .edit-form-btns { display: flex; gap: 6px; }
+  .edit-save { flex: 1; padding: 6px 0; background: var(--yellow); color: var(--black); font-weight: 700; font-size: 12px; border: none; border-radius: 5px; cursor: pointer; }
+  .edit-cancel { flex: 1; padding: 6px 0; background: var(--white); color: var(--grey-600); font-size: 12px; border: 1px solid var(--grey-300); border-radius: 5px; cursor: pointer; }
+
+  /* ── ERROR ── */
+  #error-bar {
+    display: none;
+    background: #fdf0ef;
+    border: 1px solid #f5c6c2;
+    border-radius: 8px;
+    margin: 16px 24px;
+    padding: 12px 16px;
+    font-size: 13px;
+    color: var(--red);
+  }
+
+  @media print {
+    body, #header, #stats-bar, .items-panel, .section-heading,
+    .btn-copy, .btn-edit, .btn-shipped, .edit-form, .parcel-note,
+    .collapsed-bar, #loading-screen, #auth-screen { display: none !important; }
+  }
+</style>
+</head>
+<body>
+
+<div id="header">
+  <div style="display:flex;align-items:center;gap:10px;">
+    <h1>🎮 GameJunkie Packer</h1>
+    <span class="pro-badge">PRO</span>
+  </div>
+  <div id="header-right">
+    <button class="header-btn green" id="open-all-btn" onclick="openAllOrders()">📦 Open All in eBay</button>
+    <button class="header-btn yellow" id="pick-list-btn" onclick="printPickList()">🖨 Print Pick List</button>
+    <button class="header-btn" id="refresh-btn" style="background:var(--grey-200);color:var(--grey-800);" onclick="loadOrders()">↻ Refresh</button>
+  </div>
+</div>
+
+<div id="auth-screen">
+  <div class="auth-card">
+    <div class="icon">🔐</div>
+    <h2>Connect to eBay</h2>
+    <p>Sign in with your eBay seller account to automatically load your awaiting shipment orders.</p>
+    <button class="auth-btn" onclick="startAuth()">Sign in with eBay</button>
+    <div class="auth-status" id="auth-status">Not connected</div>
+  </div>
+</div>
+
+<div id="loading-screen">
+  <div class="spinner"></div>
+  <div class="loading-text">Loading orders from eBay...</div>
+</div>
+
+<div id="error-bar"></div>
+
+<div id="stats-bar">
+  <span>Orders: <strong id="stat-total">0</strong></span>
+  <span class="stat-parcel">📦 Parcel: <strong id="stat-parcel">0</strong></span>
+  <span>Multi-item: <strong id="stat-multi">0</strong></span>
+  <span>Single: <strong id="stat-single">0</strong></span>
+  <button class="refresh-btn" onclick="loadOrders()">↻ Refresh orders</button>
+</div>
+
+<div id="main">
+  <div class="section" id="single-section">
+    <div class="section-heading grey">Single Item Orders</div>
+    <div id="single-list"></div>
+  </div>
+  <div class="section" id="multi-section">
+    <div class="section-heading yellow">⚠ Multi-Item — Bundle Before Posting</div>
+    <div id="multi-list"></div>
+  </div>
+  <div class="section" id="parcel-section">
+    <div class="section-heading orange">📦 Parcel Post — Print Label via Aus Post</div>
+    <div id="parcel-list"></div>
+  </div>
+</div>
+
+<script>
+// ── CONFIG ──
+const APP_ID    = 'GameJunk-GameJunk-PRD-c18349980-84e54bfe';
+const CERT_ID   = 'PRD-183ec2e3ce33-b3b0-4425-b93d-ad76';
+const RU_NAME   = 'Game_Junkie-GameJunk-GameJu-qemcvtfkv';
+const CALLBACK  = 'https://shane0229.github.io/gamejunkie-packer/callback.html';
+const FROM_NAME = 'GameJunkie';
+const FROM_ADDR = 'Kippa-Ring QLD 4021';
+
+const SCOPES = [
+  'https://api.ebay.com/oauth/api_scope',
+  'https://api.ebay.com/oauth/api_scope/sell.fulfillment',
+  'https://api.ebay.com/oauth/api_scope/sell.fulfillment.readonly'
+].join('%20');
+
+// ── STATE ──
+const BUYERS = {};
+let accessToken = null;
+let refreshToken = localStorage.getItem('gj_refresh_token');
+let _allOrders = [];
+let _batchOffset = 0;
+const BATCH_SIZE = 10;
+
+// ── AUTH ──
+function startAuth() {
+  const authUrl = `https://auth.ebay.com/oauth2/authorize?client_id=${APP_ID}&redirect_uri=${encodeURIComponent(CALLBACK)}&response_type=code&scope=${SCOPES}&prompt=login`;
+  const popup = window.open(authUrl, 'ebay_auth', 'width=600,height=700');
+
+  window.addEventListener('message', async function handler(e) {
+    if (e.origin !== 'https://shane0229.github.io') return;
+    window.removeEventListener('message', handler);
+    const params = new URLSearchParams(e.data);
+    const code = params.get('code');
+    if (code) {
+      setStatus('Exchanging token...', '');
+      await exchangeToken(code);
+    } else {
+      setStatus('Auth cancelled or failed.', 'error');
+    }
+  });
+}
+
+async function exchangeToken(code) {
+  try {
+    const credentials = btoa(`${APP_ID}:${CERT_ID}`);
+    const resp = await fetch('https://api.ebay.com/identity/v1/oauth2/token', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Basic ${credentials}`,
+        'Content-Type': 'application/x-www-form-urlencoded'
+      },
+      body: `grant_type=authorization_code&code=${encodeURIComponent(code)}&redirect_uri=${encodeURIComponent(CALLBACK)}`
+    });
+    const data = await resp.json();
+    if (data.access_token) {
+      accessToken = data.access_token;
+      if (data.refresh_token) {
+        refreshToken = data.refresh_token;
+        localStorage.setItem('gj_refresh_token', refreshToken);
+      }
+      setStatus('✅ Connected to eBay!', 'connected');
+      setTimeout(() => loadOrders(), 800);
+    } else {
+      setStatus('Token exchange failed: ' + (data.error_description || JSON.stringify(data)), 'error');
+    }
+  } catch(e) {
+    setStatus('Connection error: ' + e.message, 'error');
+  }
+}
+
+async function refreshAccessToken() {
+  if (!refreshToken) return false;
+  try {
+    const credentials = btoa(`${APP_ID}:${CERT_ID}`);
+    const resp = await fetch('https://api.ebay.com/identity/v1/oauth2/token', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Basic ${credentials}`,
+        'Content-Type': 'application/x-www-form-urlencoded'
+      },
+      body: `grant_type=refresh_token&refresh_token=${encodeURIComponent(refreshToken)}&scope=${SCOPES}`
+    });
+    const data = await resp.json();
+    if (data.access_token) {
+      accessToken = data.access_token;
+      return true;
+    }
+    return false;
+  } catch(e) {
+    return false;
+  }
+}
+
+function setStatus(msg, cls) {
+  const el = document.getElementById('auth-status');
+  el.textContent = msg;
+  el.className = 'auth-status' + (cls ? ' ' + cls : '');
+}
+
+// ── LOAD ORDERS ──
+async function loadOrders() {
+  if (!accessToken && refreshToken) {
+    showLoading('Reconnecting to eBay...');
+    const ok = await refreshAccessToken();
+    if (!ok) {
+      showAuth();
+      setStatus('Session expired — please sign in again.', 'error');
+      return;
+    }
+  }
+  if (!accessToken) { showAuth(); return; }
+
+  showLoading('Loading orders from eBay...');
+
+  try {
+    let allOrders = [];
+    let offset = 0;
+    const limit = 200;
+    let hasMore = true;
+
+    while (hasMore) {
+      const resp = await fetch(
+        `https://api.ebay.com/sell/fulfillment/v1/order?filter=orderfulfillmentstatus%3A%7BNOT_STARTED%7D&limit=${limit}&offset=${offset}`,
+        { headers: { 'Authorization': `Bearer ${accessToken}`, 'Content-Type': 'application/json', 'X-EBAY-C-MARKETPLACE-ID': 'EBAY_AU' } }
+      );
+
+      if (resp.status === 401) {
+        const refreshed = await refreshAccessToken();
+        if (!refreshed) { showAuth(); setStatus('Session expired.', 'error'); return; }
+        continue;
+      }
+
+      const data = await resp.json();
+      if (!data.orders || data.orders.length === 0) { hasMore = false; break; }
+
+      allOrders = allOrders.concat(data.orders);
+      offset += data.orders.length;
+      if (allOrders.length >= (data.total || 0)) hasMore = false;
+    }
+
+    processOrders(allOrders);
+
+  } catch(e) {
+    showError('Failed to load orders: ' + e.message);
+  }
+}
+
+// ── PROCESS ORDERS ──
+function processOrders(orders) {
+  Object.keys(BUYERS).forEach(k => delete BUYERS[k]);
+
+  orders.forEach(order => {
+    const buyer = order.buyer;
+    const shipping = order.fulfillmentStartInstructions?.[0]?.shippingStep;
+    const addr = shipping?.shipTo?.contactAddress || {};
+    const name = titleCase(shipping?.shipTo?.fullName || buyer?.username || '');
+
+    const a1raw = addr.addressLine1 || '';
+    const a2raw = addr.addressLine2 || '';
+    const cleanAddr = v => v.toLowerCase().startsWith('ebay:') ? '' : v;
+    const street = [titleCase(cleanAddr(a1raw)), titleCase(cleanAddr(a2raw))].filter(Boolean).join(', ');
+    const city = titleCase(addr.city || '');
+    const state = (addr.stateOrProvince || '').toUpperCase();
+    const pc = addr.postalCode || '';
+    const addrLine2 = [city, state, pc].filter(Boolean).join(' ');
+
+    const note = order.buyerCheckoutNotes || '';
+    const orderId = order.orderId || '';
+    const username = buyer?.username || orderId;
+    const key = username.toLowerCase();
+
+    if (!BUYERS[key]) {
+      BUYERS[key] = { username, name, addrLine1: street, addrLine2, note, orderNumber: orderId, items: [] };
+    }
+
+    (order.lineItems || []).forEach(item => {
+      const imageUrl = item.lineItemImageUrl || item.image?.imageUrl || '';
+      BUYERS[key].items.push({
+        title: item.title || '',
+        shelf: item.sku || item.customLabel || '',
+        itemId: item.legacyItemId || item.lineItemId || '',
+        imageUrl,
+        postage: shipping?.shippingServiceCode || order.shippingFulfillments?.[0]?.shippingServiceCode || '',
+        qty: String(item.quantity || 1),
+        price: item.lineItemCost?.value || '',
+      });
+    });
+  });
+
+  renderAll();
+}
+
+// ── RENDER ──
+function renderAll() {
+  const isParcel = b => {
+    const hasParcelPost = b.items.some(i => (i.postage||'').toLowerCase().includes('parcel'));
+    const untrackedCount = b.items.filter(i => !(i.postage||'').toLowerCase().includes('parcel')).length;
+    return hasParcelPost || untrackedCount >= 3;
+  };
+
+  const parcelBuyers = Object.values(BUYERS).filter(isParcel).sort((a,b) => b.items.length - a.items.length);
+  const nonParcel = Object.values(BUYERS).filter(b => !isParcel(b));
+  const multiBuyers = nonParcel.filter(b => b.items.length > 1).sort((a,b) => b.items.length - a.items.length);
+  const singleBuyers = nonParcel.filter(b => b.items.length === 1);
+
+  document.getElementById('stat-total').textContent = Object.values(BUYERS).length;
+  document.getElementById('stat-parcel').textContent = parcelBuyers.length;
+  document.getElementById('stat-multi').textContent = multiBuyers.length;
+  document.getElementById('stat-single').textContent = singleBuyers.length;
+
+  let idx = 0;
+  document.getElementById('single-list').innerHTML = singleBuyers.map(b => { const i = idx++; BUYERS[b.username.toLowerCase()]._idx = i; return buildCard(b, i, 'single'); }).join('');
+  document.getElementById('multi-list').innerHTML = multiBuyers.map(b => { const i = idx++; BUYERS[b.username.toLowerCase()]._idx = i; return buildCard(b, i, 'multi'); }).join('');
+  document.getElementById('parcel-list').innerHTML = parcelBuyers.map(b => { const i = idx++; BUYERS[b.username.toLowerCase()]._idx = i; return buildCard(b, i, 'parcel'); }).join('');
+
+  document.getElementById('multi-section').style.display = multiBuyers.length ? 'block' : 'none';
+  document.getElementById('parcel-section').style.display = parcelBuyers.length ? 'block' : 'none';
+
+  // Wire up buttons
+  document.querySelectorAll('.btn-shipped').forEach(btn => {
+    btn.addEventListener('click', function() { markShipped(this.dataset.id); });
+  });
+  document.querySelectorAll('.btn-copy').forEach(btn => {
+    btn.addEventListener('click', function() { copyAddress(this.dataset.id, this); });
+  });
+  document.querySelectorAll('.btn-edit').forEach(btn => {
+    btn.addEventListener('click', function() {
+      document.getElementById('edit-form-' + this.dataset.id).classList.toggle('open');
+    });
+  });
+  document.querySelectorAll('.edit-save').forEach(btn => {
+    btn.addEventListener('click', function() { saveEdit(this.dataset.id); });
+  });
+  document.querySelectorAll('.edit-cancel').forEach(btn => {
+    btn.addEventListener('click', function() {
+      document.getElementById('edit-form-' + this.dataset.id).classList.remove('open');
+    });
+  });
+
+  showMain();
+}
+
+function buildCard(b, idx, type) {
+  const isParcel = type === 'parcel';
+  const isMulti = b.items.length > 1;
+  const hasUntracked = b.items.some(i => !(i.postage||'').toLowerCase().includes('parcel'));
+  const showLabel = !isParcel || hasUntracked;
+  const isOversize = !b.items.some(i => (i.postage||'').toLowerCase().includes('parcel')) && b.items.length >= 3;
+
+  const itemsHtml = b.items.map(item => {
+    const isParcelItem = (item.postage||'').toLowerCase().includes('parcel');
+    const thumb = item.imageUrl
+      ? `<img class="item-thumb" src="${esc(item.imageUrl)}" alt="" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`
+      : '';
+    const placeholder = `<div class="item-thumb-placeholder" ${item.imageUrl ? 'style="display:none"' : ''}>📀</div>`;
+    const titleEl = item.itemId
+      ? `<a href="https://www.ebay.com.au/itm/${esc(item.itemId)}" target="_blank" class="item-title">${esc(item.title)}</a>`
+      : `<span class="item-title">${esc(item.title)}</span>`;
+    return `
+      <li class="item-row">
+        ${thumb}${placeholder}
+        <div class="item-info">
+          <div style="display:flex;align-items:flex-start;gap:4px;flex-wrap:wrap">
+            ${item.shelf ? `<span class="shelf-tag">${esc(item.shelf)}</span>` : ''}
+            ${titleEl}
+          </div>
+          <div class="item-postage">${isParcelItem ? '<span class="parcel-label">📦 Parcel Post</span>' : esc(item.postage || 'Untracked')}</div>
+        </div>
+      </li>`;
+  }).join('');
+
+  const labelHtml = showLabel ? `
+    <div class="label-preview" id="label-${idx}">
+      ${isMulti ? `<div class="label-item-count">${b.items.length} ITEMS</div>` : ''}
+      <div class="label-from"><strong>FROM:</strong> ${esc(FROM_NAME)}, ${esc(FROM_ADDR)}</div>
+      <hr class="label-divider">
+      <div>
+        <div class="label-to-name">${esc(b.name)}</div>
+        <div class="label-to-addr">
+          ${b.addrLine1 ? esc(b.addrLine1) + '<br>' : ''}
+          ${esc(b.addrLine2)}
+        </div>
+      </div>
+    </div>
+    <div class="edit-form" id="edit-form-${idx}">
+      <input type="text" id="edit-name-${idx}" value="${esc(b.name)}" placeholder="Name">
+      <input type="text" id="edit-addr1-${idx}" value="${esc(b.addrLine1)}" placeholder="Street">
+      <input type="text" id="edit-addr2-${idx}" value="${esc(b.addrLine2)}" placeholder="Suburb State Postcode">
+      <div class="edit-form-btns">
+        <button class="edit-save" data-id="${idx}">✓ Save</button>
+        <button class="edit-cancel" data-id="${idx}">✕</button>
+      </div>
+    </div>
+    <button class="action-btn btn-copy" data-id="${idx}">📋 Copy Address</button>
+    <button class="action-btn btn-edit" data-id="${idx}">✏ Edit Label</button>
+  ` : `<div class="parcel-note">Label printed<br>via Aus Post</div>`;
+
+  const shippedBtn = b.orderNumber
+    ? `<button class="action-btn btn-shipped" data-id="${idx}" data-order="${esc(b.orderNumber)}">📦 Mark as Shipped</button>`
+    : '';
+
+  return `
+    <div class="buyer-card ${type}" id="card-${idx}">
+      <div class="collapsed-bar" onclick="expandCard(${idx})">
+        <span><span class="collapsed-name">${esc(b.name)}</span><span class="collapsed-addr">${esc(b.addrLine1)}${b.addrLine2 ? ', ' + esc(b.addrLine2) : ''}</span></span>
+        <button class="expand-btn">↕ Expand</button>
+      </div>
+      <div class="card-body">
+        <div class="items-panel">
+          <div class="buyer-header">
+            <span class="buyer-name">${esc(b.name)}</span>
+            ${isMulti && !isParcel ? `<span class="badge badge-count">${b.items.length} items</span>` : ''}
+            ${isParcel && !isOversize ? `<span class="badge badge-parcel">📦 Parcel Post</span>` : ''}
+            ${isOversize ? `<span class="badge badge-oversize">📦 3+ items → Parcel</span>` : ''}
+            ${isParcel && isMulti ? `<span class="badge badge-count">${b.items.length} items</span>` : ''}
+          </div>
+          <div class="buyer-addr">${esc(b.addrLine1)}${b.addrLine2 ? ' · ' + esc(b.addrLine2) : ''}</div>
+          <ul class="item-list">${itemsHtml}</ul>
+          ${b.note ? `<div class="buyer-note"><strong>📝 Buyer Note</strong>${esc(b.note)}</div>` : ''}
+        </div>
+        <div class="label-panel">
+          ${labelHtml}
+          ${shippedBtn}
+        </div>
+      </div>
+    </div>`;
+}
+
+// ── ACTIONS ──
+function markShipped(idx) {
+  const btn = document.querySelector(`.btn-shipped[data-id="${idx}"]`);
+  const orderNumber = btn?.dataset.order;
+  if (orderNumber) {
+    window.open('https://www.ebay.com.au/sh/ord/details?orderid=' + encodeURIComponent(orderNumber), '_blank');
+  }
+  setTimeout(() => {
+    const card = document.getElementById('card-' + idx);
+    if (card) card.classList.add('collapsed');
+  }, 600);
+}
+
+function copyAddress(idx, btn) {
+  const b = getBuyerByIdx(idx);
+  if (!b) return;
+  const text = [b.name, b.addrLine1, b.addrLine2].filter(Boolean).join('\n');
+  navigator.clipboard.writeText(text).then(() => {
+    btn.textContent = '✓ Copied!';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = '📋 Copy Address'; btn.classList.remove('copied'); }, 2000);
+  });
+}
+
+function saveEdit(idx) {
+  const b = getBuyerByIdx(idx);
+  if (!b) return;
+  b.name = document.getElementById('edit-name-' + idx).value.trim();
+  b.addrLine1 = document.getElementById('edit-addr1-' + idx).value.trim();
+  b.addrLine2 = document.getElementById('edit-addr2-' + idx).value.trim();
+  const preview = document.getElementById('label-' + idx);
+  if (preview) {
+    preview.querySelector('.label-to-name').textContent = b.name;
+    preview.querySelector('.label-to-addr').innerHTML = (b.addrLine1 ? esc(b.addrLine1) + '<br>' : '') + esc(b.addrLine2);
+  }
+  const card = document.getElementById('card-' + idx);
+  if (card) card.querySelector('.buyer-name').textContent = b.name;
+  document.getElementById('edit-form-' + idx).classList.remove('open');
+}
+
+function expandCard(idx) {
+  const card = document.getElementById('card-' + idx);
+  if (card) card.classList.remove('collapsed');
+}
+
+function getBuyerByIdx(idx) {
+  return Object.values(BUYERS).find(b => b._idx == idx);
+}
+
+// ── OPEN ALL ORDERS ──
+function openAllOrders() {
+  const isParcelBuyer = b => {
+    const hasParcel = b.items.some(i => (i.postage||'').toLowerCase().includes('parcel'));
+    const untracked = b.items.filter(i => !(i.postage||'').toLowerCase().includes('parcel')).length;
+    return hasParcel || untracked >= 3;
+  };
+  _allOrders = Object.values(BUYERS)
+    .filter(b => b.orderNumber && !isParcelBuyer(b))
+    .map(b => b.orderNumber)
+    .filter((v,i,a) => a.indexOf(v) === i);
+
+  if (_allOrders.length === 0) { alert('No orders found.'); return; }
+  _batchOffset = 0;
+  openNextBatch();
+}
+
+function openNextBatch() {
+  const batch = _allOrders.slice(_batchOffset, _batchOffset + BATCH_SIZE);
+  const remaining = _allOrders.length - _batchOffset - batch.length;
+  if (batch.length === 0) { alert('All orders opened!'); return; }
+  const msg = remaining > 0
+    ? `Open next ${batch.length} orders in eBay?\n(${remaining} more after this batch)`
+    : `Open final ${batch.length} order${batch.length !== 1 ? 's' : ''} in eBay?`;
+  if (!confirm(msg)) return;
+  batch.forEach((orderNumber, i) => {
+    setTimeout(() => window.open('https://www.ebay.com.au/sh/ord/details?orderid=' + encodeURIComponent(orderNumber), '_blank'), i * 300);
+  });
+  _batchOffset += BATCH_SIZE;
+  const btn = document.getElementById('open-all-btn');
+  if (_batchOffset < _allOrders.length) {
+    btn.textContent = `📦 Open Next 10 (${_allOrders.length - _batchOffset} left)`;
+    btn.onclick = openNextBatch;
+  } else {
+    btn.textContent = '📦 Open All in eBay';
+    btn.onclick = openAllOrders;
+  }
+}
+
+// ── PICK LIST ──
+function parseLocation(sku) {
+  if (!sku) return { type: 'unknown', raw: sku };
+  const bsMatch = sku.match(/^B(\d+)\s+S(\d+)(?:\s+R(\d+))?$/i);
+  if (bsMatch) return { type: 'bookshelf', b: parseInt(bsMatch[1]), s: parseInt(bsMatch[2]), r: parseInt(bsMatch[3]||0), raw: sku };
+  const boxMatch = sku.match(/^([A-Z]+)(\d+)$/i);
+  if (boxMatch) return { type: 'box', letter: boxMatch[1].toUpperCase(), num: parseInt(boxMatch[2]), raw: sku };
+  return { type: 'unknown', raw: sku };
+}
+
+function locationSortKey(loc) {
+  if (loc.type === 'box') return '0' + loc.letter.padStart(3,' ') + String(loc.num).padStart(4,'0');
+  if (loc.type === 'bookshelf') return '1' + String(loc.b).padStart(3,'0') + String(loc.s).padStart(3,'0') + String(loc.r).padStart(3,'0');
+  return '2' + loc.raw;
+}
+
+function printPickList() {
+  const allItems = [];
+  Object.values(BUYERS).forEach(b => {
+    b.items.forEach(item => allItems.push({ shelf: item.shelf||'', title: item.title||'', qty: item.qty||'1' }));
+  });
+
+  const sorted = allItems.map(item => ({ ...item, loc: parseLocation(item.shelf.trim()) }))
+    .sort((a,b) => { const ka = locationSortKey(a.loc), kb = locationSortKey(b.loc); return ka < kb ? -1 : ka > kb ? 1 : 0; });
+
+  const groups = [];
+  let lastKey = null;
+  sorted.forEach(item => {
+    const key = item.shelf.trim().toUpperCase();
+    if (key !== lastKey) { groups.push({ shelf: item.shelf, items: [] }); lastKey = key; }
+    groups[groups.length-1].items.push(item);
+  });
+
+  const today = new Date().toLocaleDateString('en-AU', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
+  let rowsHtml = '';
+  let rowNum = 1;
+  groups.forEach(g => {
+    g.items.forEach((item, i) => {
+      const shade = rowNum % 2 === 0 ? 'background:#f9f9f9;' : '';
+      rowsHtml += `<tr style="${shade}border-bottom:1px solid #ddd;">
+        <td style="padding:7px 10px;font-weight:700;font-family:monospace;font-size:12px;white-space:nowrap;border-right:2px solid #333;">${i===0 ? escHtml(g.shelf) : ''}</td>
+        <td style="padding:7px 10px;font-size:12px;">${escHtml(item.title)}</td>
+        <td style="padding:7px 10px;font-size:12px;text-align:center;">${escHtml(item.qty)}</td>
+        <td style="padding:7px 10px;text-align:center;font-size:14px;">☐</td>
+      </tr>`;
+      rowNum++;
+    });
+    rowsHtml += `<tr style="height:4px;"><td colspan="4"></td></tr>`;
+  });
+
+  const win = window.open('','_blank','width=900,height=700');
+  win.document.write(`<!DOCTYPE html><html><head><title>Pick List</title>
+<style>*{box-sizing:border-box;margin:0;padding:0}body{font-family:Arial,sans-serif;background:white;color:black;padding:12mm}@page{size:A4;margin:12mm}h1{font-size:18pt;font-weight:700;margin-bottom:2mm}
+.meta{font-size:9pt;color:#555;margin-bottom:6mm}table{width:100%;border-collapse:collapse}
+thead tr{background:#000;color:#fff}thead th{padding:8px 10px;font-size:11pt;text-align:left;font-weight:700}
+tfoot td{padding-top:8mm;font-size:9pt;color:#555;text-align:right}</style></head><body>
+<h1>GAMEJUNKIE — PICK LIST</h1>
+<div class="meta">${today} · ${allItems.length} item${allItems.length!==1?'s':''} to pick</div>
+<table><thead><tr><th style="width:90px">LOCATION</th><th>ITEM</th><th style="width:40px;text-align:center">QTY</th><th style="width:36px;text-align:center">✓</th></tr></thead>
+<tbody>${rowsHtml}</tbody>
+<tfoot><tr><td colspan="4">GameJunkie · Kippa-Ring QLD 4021 · Printed ${new Date().toLocaleTimeString('en-AU')}</td></tr></tfoot>
+</table></body></html>`);
+  win.document.close();
+  win.focus();
+  setTimeout(() => { win.print(); win.close(); }, 400);
+}
+
+// ── UTILS ──
+function titleCase(str) {
+  if (!str) return '';
+  const UPPER = new Set(['NSW','VIC','QLD','SA','WA','TAS','NT','ACT','PO','GPO']);
+  const LOWER = new Set(['a','an','the','and','or','of','to','in','on','at','by','for']);
+  return str.toLowerCase().replace(/\S+/g, (word, offset) => {
+    const clean = word.replace(/[^a-z]/gi,'').toUpperCase();
+    if (UPPER.has(clean)) return clean;
+    if (offset > 0 && LOWER.has(word)) return word;
+    return word.charAt(0).toUpperCase() + word.slice(1);
+  });
+}
+
+function esc(str) {
+  if (!str) return '';
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function escHtml(str) {
+  if (!str) return '';
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function showAuth() {
+  document.getElementById('auth-screen').style.display = 'block';
+  document.getElementById('loading-screen').style.display = 'none';
+  document.getElementById('stats-bar').style.display = 'none';
+  document.getElementById('main').style.display = 'none';
+  ['open-all-btn','pick-list-btn','refresh-btn'].forEach(id => document.getElementById(id).style.display = 'none');
+}
+
+function showLoading(msg) {
+  document.getElementById('auth-screen').style.display = 'none';
+  document.getElementById('loading-screen').style.display = 'block';
+  document.getElementById('loading-screen').querySelector('.loading-text').textContent = msg || 'Loading...';
+  document.getElementById('stats-bar').style.display = 'none';
+  document.getElementById('main').style.display = 'none';
+}
+
+function showMain() {
+  document.getElementById('auth-screen').style.display = 'none';
+  document.getElementById('loading-screen').style.display = 'none';
+  document.getElementById('error-bar').style.display = 'none';
+  document.getElementById('stats-bar').style.display = 'flex';
+  document.getElementById('main').style.display = 'block';
+  ['open-all-btn','pick-list-btn','refresh-btn'].forEach(id => document.getElementById(id).style.display = 'block');
+}
+
+function showError(msg) {
+  document.getElementById('loading-screen').style.display = 'none';
+  const bar = document.getElementById('error-bar');
+  bar.textContent = '⚠ ' + msg;
+  bar.style.display = 'block';
+  showAuth();
+}
+
+// ── INIT ──
+if (refreshToken) {
+  showLoading('Reconnecting to eBay...');
+  refreshAccessToken().then(ok => {
+    if (ok) loadOrders();
+    else { showAuth(); setStatus('Session expired — please sign in again.', 'error'); }
+  });
+}
+</script>
+</body>
+</html>
