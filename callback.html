@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html>
+<head><title>GameJunkie Packer Auth</title></head>
+<body>
+<h2>✅ Authorisation successful!</h2>
+<p>You can close this tab and return to GameJunkie Packer.</p>
+<script>
+  if (window.opener) {
+    window.opener.postMessage(window.location.search, '*');
+  }
+  setTimeout(() => window.close(), 2000);
+</script>
+</body>
+</html>
