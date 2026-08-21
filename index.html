@@ -679,7 +679,9 @@
     <span class="pro-badge">PRO</span>
   </div>
   <div id="header-right">
-    <button class="header-btn" id="auspost-all-btn" onclick="downloadAllParcelsCSV()" style="background:#e21e26;color:#fff;display:none;">📮 Aus Post CSV</button>
+    <button class="header-btn" id="auspost-mpb-btn" onclick="window.open('https://auspost.com.au/mypost-business/orders/draft/','_blank')" style="background:#c00;color:#fff;display:none;">📮 MyPost Business</button>
+    <label class="header-btn" id="tracking-upload-btn" style="background:#1a5fa8;color:#fff;display:none;cursor:pointer;">📄 Upload Tracking PDF<input type="file" accept=".pdf" style="display:none" onchange="handleTrackingPDF(this)"></label>
+    <button class="header-btn" id="auspost-all-btn" onclick="downloadAllParcelsCSV()" style="background:#e21e26;color:#fff;display:none;">⬇ Aus Post CSV</button>
     <button class="header-btn green" id="open-all-btn" onclick="openAllOrders()">📦 Open All in eBay</button>
     <button class="header-btn yellow" id="pick-list-btn" onclick="printPickList()">🖨 Print Pick List</button>
     <button class="header-btn" id="refresh-btn" style="background:var(--grey-200);color:var(--grey-800);" onclick="loadOrders()">↻ Refresh</button>
@@ -1160,7 +1162,6 @@ function buildCard(b, idx, type) {
       <option value="XL">Extra Large Satchel (up to 5kg)</option>
     </select>
     <button class="btn-auspost-csv" onclick="downloadAusPostCSV(${idx})">⬇ Download Aus Post CSV</button>
-    <a class="btn-auspost" href="https://auspost.com.au/mypost-business/orders/draft/" target="_blank">📮 Open MyPost Business</a>
   ` : '';
 
   const labelHtml = showLabel ? `
@@ -1582,6 +1583,101 @@ function runSearch(query) {
   });
 }
 
+async function handleTrackingPDF(input) {
+  const file = input.files[0];
+  if (!file) return;
+  input.value = '';
+
+  const btn = document.getElementById('tracking-upload-btn');
+  btn.textContent = '⏳ Processing...';
+
+  try {
+    // Read PDF as base64
+    const base64 = await new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = e => resolve(e.target.result.split(',')[1]);
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+
+    // Send to proxy to parse
+    const resp = await fetch(`${PROXY}/parsepdf`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ pdfBase64: base64 })
+    });
+    const data = await resp.json();
+
+    if (!data.shipments || data.shipments.length === 0) {
+      alert('No tracking numbers found in PDF.');
+      btn.textContent = '📄 Upload Tracking PDF';
+      return;
+    }
+
+    // Match shipments to buyers by name and push tracking to eBay
+    let matched = 0;
+    let failed = 0;
+    const results = [];
+
+    for (const shipment of data.shipments) {
+      // Find matching buyer by name (case insensitive)
+      const buyer = Object.values(BUYERS).find(b =>
+        b.name.toLowerCase().trim() === shipment.name.toLowerCase().trim()
+      );
+
+      if (!buyer) {
+        results.push(`❌ No match for: ${shipment.name}`);
+        failed++;
+        continue;
+      }
+
+      // Get all order IDs for this buyer
+      const orderIds = buyer.orderIds && buyer.orderIds.length > 0 ? buyer.orderIds : [buyer.orderNumber];
+
+      // Push tracking to each order
+      for (const orderId of orderIds.filter(Boolean)) {
+        const lineItemIds = buyer.items.filter(i => i.orderId === orderId).map(i => i.lineItemId).filter(Boolean);
+        
+        try {
+          const shipResp = await fetch(`${PROXY}/shipwithtracking`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              access_token: accessToken,
+              order_id: orderId,
+              line_item_ids: lineItemIds.length > 0 ? lineItemIds : buyer.items.map(i => i.lineItemId).filter(Boolean),
+              tracking_number: shipment.tracking,
+              carrier: 'AustraliaPost'
+            })
+          });
+          const shipData = await shipResp.json();
+          if (shipData.success || shipData.status === 201) {
+            matched++;
+            results.push(`✅ ${buyer.name} → ${shipment.tracking}`);
+            // Collapse the card
+            const cardIdx = buyer._idx;
+            const card = document.getElementById('card-' + cardIdx);
+            if (card) card.classList.add('collapsed');
+          } else {
+            failed++;
+            results.push(`❌ ${buyer.name}: eBay error ${shipData.status}`);
+          }
+        } catch(e) {
+          failed++;
+          results.push(`❌ ${buyer.name}: ${e.message}`);
+        }
+      }
+    }
+
+    alert(`Tracking upload complete!\n\n${results.join('\n')}\n\n${matched} succeeded, ${failed} failed.`);
+
+  } catch(e) {
+    alert('Error processing PDF: ' + e.message);
+  }
+
+  btn.textContent = '📄 Upload Tracking PDF';
+}
+
 function getSatchelDetails(size) {
   // Correct AP satchel sizes as of Aug 2025:
   // XS=250g, S=500g, M=1kg, L=3kg, XL=5kg
@@ -1692,7 +1788,14 @@ function buildAusPostCSV(shipments) {
       '',                    // Deliver To Email Address
       details.packagingType, // Item Packaging Type (e.g. AP_SATCHEL_S)
       'PP',                  // Item Delivery Service - Parcel Post
-      csvEsc(details.label), // Item Description
+      (() => {
+        const titles = b.items.map(i => i.title || '').join(' ').toUpperCase();
+        const hasCD = titles.includes(' CD') || titles.includes('CD ') || titles.includes('MUSIC') || titles.includes('ALBUM') || titles.includes('VINYL');
+        const hasDVD = titles.includes('DVD') || titles.includes('BLU-RAY') || titles.includes('BLURAY') || titles.includes('4K') || titles.includes('SERIES') || titles.includes('SEASON');
+        if (hasCD && hasDVD) return 'DVDs and CDs';
+        if (hasCD) return 'CDs';
+        return 'DVDs';
+      })(),              // Item Description
       '',                    // Item Length (optional for MyPost Business)
       '',                    // Item Width
       '',                    // Item Height
@@ -1722,9 +1825,15 @@ function downloadAllParcelsCSV() {
   const shipments = parcels.map(b => {
     const cardIdx = b._idx;
     const satchelEl = document.getElementById('satchel-' + cardIdx);
-    const size = satchelEl ? satchelEl.value || 'S' : 'S';
+    const size = satchelEl ? satchelEl.value : '';
+    if (!size) return null; // skip if no size selected
     return { buyer: b, details: getSatchelDetails(size) };
-  });
+  }).filter(Boolean); // remove nulls
+
+  if (shipments.length === 0) {
+    alert('Please select a satchel size on at least one parcel card first!');
+    return;
+  }
 
   const csv = buildAusPostCSV(shipments);
   downloadCSV(csv, `auspost_parcels_${new Date().toISOString().slice(0,10)}.csv`);
@@ -1776,7 +1885,8 @@ function showAuth() {
   document.getElementById('loading-screen').style.display = 'none';
   document.getElementById('stats-bar').style.display = 'none';
   document.getElementById('main').style.display = 'none';
-  ['open-all-btn','pick-list-btn','refresh-btn','auspost-all-btn'].forEach(id => document.getElementById(id).style.display = 'none');
+  ['open-all-btn','pick-list-btn','refresh-btn','auspost-all-btn','auspost-mpb-btn'].forEach(id => document.getElementById(id).style.display = 'none');
+  document.getElementById('tracking-upload-btn').style.display = 'none';
   document.getElementById('search-bar').style.display = 'none';
 }
 
@@ -1794,7 +1904,8 @@ function showMain() {
   document.getElementById('error-bar').style.display = 'none';
   document.getElementById('stats-bar').style.display = 'flex';
   document.getElementById('main').style.display = 'block';
-  ['open-all-btn','pick-list-btn','refresh-btn','auspost-all-btn'].forEach(id => document.getElementById(id).style.display = 'block');
+  ['open-all-btn','pick-list-btn','refresh-btn','auspost-all-btn','auspost-mpb-btn'].forEach(id => document.getElementById(id).style.display = 'block');
+  document.getElementById('tracking-upload-btn').style.display = 'block';
   document.getElementById('search-bar').style.display = 'block';
 }
 
