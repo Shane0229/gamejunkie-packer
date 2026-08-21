@@ -318,25 +318,25 @@
   .item-row:first-child { border-top: none; }
 
   .item-thumb {
-    width: 48px;
-    height: 48px;
-    object-fit: cover;
-    border-radius: 5px;
-    background: var(--grey-100);
+    width: 250px;
+    height: 250px;
+    object-fit: contain;
+    border-radius: 6px;
+    background: var(--grey-50);
     flex-shrink: 0;
     border: 1px solid var(--grey-200);
   }
 
   .item-thumb-placeholder {
-    width: 48px;
-    height: 48px;
+    width: 250px;
+    height: 250px;
     background: var(--grey-100);
-    border-radius: 5px;
+    border-radius: 6px;
     flex-shrink: 0;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 18px;
+    font-size: 60px;
     border: 1px solid var(--grey-200);
   }
 
@@ -364,6 +364,25 @@
   a.item-title { border-bottom: 1px dashed var(--grey-300); }
   a.item-title:hover { color: var(--yellow-dark); border-bottom-color: var(--yellow-dark); }
 
+  .days-to-sell {
+    font-size: 10px;
+    color: var(--grey-400);
+    font-family: 'DM Mono', monospace;
+    margin-top: 2px;
+  }
+
+  .item-price {
+    display: inline-block;
+    background: #f0faf4;
+    color: #1a7a3e;
+    font-weight: 700;
+    font-size: 13px;
+    padding: 2px 8px;
+    border-radius: 4px;
+    border: 1px solid #a8d5b0;
+    margin-top: 4px;
+  }
+
   .item-postage {
     font-size: 11px;
     color: var(--grey-400);
@@ -371,6 +390,17 @@
     font-family: 'DM Mono', monospace;
   }
   .item-postage .parcel-label { color: var(--orange); font-weight: 700; }
+
+  .order-total {
+    display: inline-block;
+    background: #f5c400;
+    color: #111;
+    font-weight: 700;
+    font-size: 13px;
+    padding: 3px 10px;
+    border-radius: 6px;
+    margin-left: 8px;
+  }
 
   .buyer-note {
     margin-top: 10px;
@@ -497,6 +527,64 @@
     border: 1px solid var(--grey-300) !important;
   }
 
+  .btn-print {
+    background: #1a5fa8;
+    color: #fff;
+  }
+  .btn-print:hover { opacity: 0.88; }
+  .btn-print.printing { background: var(--grey-300); color: var(--grey-600); }
+  .btn-print.printed { background: var(--green); color: #fff; }
+
+  .satchel-select {
+    width: 100%;
+    padding: 7px 8px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    border: 1.5px solid var(--grey-300);
+    border-radius: 6px;
+    background: var(--white);
+    color: var(--grey-800);
+    cursor: pointer;
+    margin-bottom: 4px;
+  }
+
+  .btn-auspost-csv {
+    background: #e21e26;
+    color: #fff;
+    width: 100%;
+    padding: 8px 0;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    border-radius: 6px;
+    cursor: pointer;
+    border: none;
+    text-align: center;
+    display: block;
+    transition: opacity 0.15s;
+    margin-bottom: 4px;
+  }
+  .btn-auspost-csv:hover { opacity: 0.88; }
+
+  .btn-auspost {
+    background: #e21e26;
+    color: #fff;
+    width: 100%;
+    padding: 8px 0;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    border-radius: 6px;
+    cursor: pointer;
+    border: none;
+    text-align: center;
+    display: block;
+    text-decoration: none;
+    transition: opacity 0.15s;
+  }
+  .btn-auspost:hover { opacity: 0.88; }
+
   .parcel-note {
     font-size: 11px;
     color: var(--grey-400);
@@ -538,6 +626,44 @@
     color: var(--red);
   }
 
+  /* ── SEARCH BAR ── */
+  #search-bar {
+    display: none;
+    padding: 10px 24px;
+    background: var(--white);
+    border-bottom: 1px solid var(--grey-200);
+    position: sticky;
+    top: 56px;
+    z-index: 150;
+  }
+
+  #search-input {
+    width: 100%;
+    padding: 9px 16px 9px 40px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    border: 1.5px solid var(--grey-300);
+    border-radius: 8px;
+    background: var(--grey-50);
+    color: var(--grey-800);
+    outline: none;
+    transition: border-color 0.15s;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23aaa' stroke-width='2'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: 12px center;
+  }
+  #search-input:focus { border-color: var(--yellow); background-color: var(--white); }
+
+  .search-count {
+    font-size: 12px;
+    color: var(--grey-400);
+    margin-top: 6px;
+    text-align: right;
+  }
+
+  .buyer-card.search-hidden { display: none; }
+  .buyer-card .highlight { background: #fff3b0; border-radius: 2px; padding: 0 1px; }
+
   @media print {
     body, #header, #stats-bar, .items-panel, .section-heading,
     .btn-copy, .btn-edit, .btn-shipped, .edit-form, .parcel-note,
@@ -553,6 +679,7 @@
     <span class="pro-badge">PRO</span>
   </div>
   <div id="header-right">
+    <button class="header-btn" id="auspost-all-btn" onclick="downloadAllParcelsCSV()" style="background:#e21e26;color:#fff;display:none;">📮 Aus Post CSV</button>
     <button class="header-btn green" id="open-all-btn" onclick="openAllOrders()">📦 Open All in eBay</button>
     <button class="header-btn yellow" id="pick-list-btn" onclick="printPickList()">🖨 Print Pick List</button>
     <button class="header-btn" id="refresh-btn" style="background:var(--grey-200);color:var(--grey-800);" onclick="loadOrders()">↻ Refresh</button>
@@ -584,6 +711,11 @@
   <button class="refresh-btn" onclick="loadOrders()">↻ Refresh orders</button>
 </div>
 
+<div id="search-bar">
+  <input type="text" id="search-input" placeholder="Search by name, address, item title or shelf location..." oninput="runSearch(this.value)">
+  <div class="search-count" id="search-count"></div>
+</div>
+
 <div id="main">
   <div class="section" id="single-section">
     <div class="section-heading grey">Single Item Orders</div>
@@ -605,6 +737,7 @@ const APP_ID    = 'GameJunk-GameJunk-PRD-c18349980-84e54bfe';
 const CERT_ID   = 'PRD-183ec2e3ce33-b3b0-4425-b93d-ad76';
 const RU_NAME   = 'Game_Junkie-GameJunk-GameJu-qemcvtfkv';
 const CALLBACK  = 'https://shane0229.github.io/gamejunkie-packer/callback.html';
+const PROXY = 'http://localhost:3747';
 const FROM_NAME = 'GameJunkie';
 const FROM_ADDR = 'Kippa-Ring QLD 4021';
 
@@ -624,19 +757,49 @@ const BATCH_SIZE = 10;
 
 // ── AUTH ──
 function startAuth() {
-  const authUrl = `https://auth.ebay.com/oauth2/authorize?client_id=${APP_ID}&redirect_uri=${encodeURIComponent(CALLBACK)}&response_type=code&scope=${SCOPES}&prompt=login`;
+  const authUrl = `https://auth.ebay.com/oauth2/authorize?client_id=${APP_ID}&redirect_uri=${encodeURIComponent(RU_NAME)}&response_type=code&scope=${SCOPES}&prompt=login`;
   const popup = window.open(authUrl, 'ebay_auth', 'width=600,height=700');
+  setStatus('Waiting for eBay sign-in...', '');
 
+  // Poll popup URL for our GitHub callback with code
+  const poll = setInterval(async () => {
+    try {
+      if (!popup || popup.closed) {
+        clearInterval(poll);
+        setStatus('Sign-in window closed.', 'error');
+        return;
+      }
+      let href = '';
+      try { href = popup.location.href; } catch(e) { return; }
+      if (href.includes('shane0229.github.io') && href.includes('code=')) {
+        clearInterval(poll);
+        const params = new URLSearchParams(new URL(href).search);
+        const code = params.get('code');
+        try { popup.close(); } catch(e) {}
+        if (code) {
+          setStatus('Exchanging token...', '');
+          await exchangeToken(code);
+        } else {
+          setStatus('Auth failed — no code returned.', 'error');
+        }
+      }
+    } catch(e) {}
+  }, 500);
+
+  // Also listen for postMessage from callback page
   window.addEventListener('message', async function handler(e) {
-    if (e.origin !== 'https://shane0229.github.io') return;
+    const data = e.data ? e.data.toString() : '';
+    if (!data.includes('code=')) return;
+    clearInterval(poll);
     window.removeEventListener('message', handler);
-    const params = new URLSearchParams(e.data);
-    const code = params.get('code');
+    try { popup.close(); } catch(e) {}
+    const qs = data.startsWith('?') ? data.slice(1) : data;
+    const code = new URLSearchParams(qs).get('code');
     if (code) {
       setStatus('Exchanging token...', '');
       await exchangeToken(code);
     } else {
-      setStatus('Auth cancelled or failed.', 'error');
+      setStatus('Auth failed.', 'error');
     }
   });
 }
@@ -644,13 +807,10 @@ function startAuth() {
 async function exchangeToken(code) {
   try {
     const credentials = btoa(`${APP_ID}:${CERT_ID}`);
-    const resp = await fetch('https://api.ebay.com/identity/v1/oauth2/token', {
+    const resp = await fetch(`${PROXY}/token`, {
       method: 'POST',
-      headers: {
-        'Authorization': `Basic ${credentials}`,
-        'Content-Type': 'application/x-www-form-urlencoded'
-      },
-      body: `grant_type=authorization_code&code=${encodeURIComponent(code)}&redirect_uri=${encodeURIComponent(CALLBACK)}`
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ code })
     });
     const data = await resp.json();
     if (data.access_token) {
@@ -673,13 +833,10 @@ async function refreshAccessToken() {
   if (!refreshToken) return false;
   try {
     const credentials = btoa(`${APP_ID}:${CERT_ID}`);
-    const resp = await fetch('https://api.ebay.com/identity/v1/oauth2/token', {
+    const resp = await fetch(`${PROXY}/refresh`, {
       method: 'POST',
-      headers: {
-        'Authorization': `Basic ${credentials}`,
-        'Content-Type': 'application/x-www-form-urlencoded'
-      },
-      body: `grant_type=refresh_token&refresh_token=${encodeURIComponent(refreshToken)}&scope=${SCOPES}`
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ refresh_token: refreshToken })
     });
     const data = await resp.json();
     if (data.access_token) {
@@ -720,10 +877,11 @@ async function loadOrders() {
     let hasMore = true;
 
     while (hasMore) {
-      const resp = await fetch(
-        `https://api.ebay.com/sell/fulfillment/v1/order?filter=orderfulfillmentstatus%3A%7BNOT_STARTED%7D&limit=${limit}&offset=${offset}`,
-        { headers: { 'Authorization': `Bearer ${accessToken}`, 'Content-Type': 'application/json', 'X-EBAY-C-MARKETPLACE-ID': 'EBAY_AU' } }
-      );
+      const resp = await fetch(`${PROXY}/orders`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ access_token: accessToken, offset, limit })
+      });
 
       if (resp.status === 401) {
         const refreshed = await refreshAccessToken();
@@ -732,6 +890,13 @@ async function loadOrders() {
       }
 
       const data = await resp.json();
+      console.log('Orders response:', JSON.stringify(data).substring(0, 500));
+
+      if (data.errors) {
+        showError('eBay API error: ' + JSON.stringify(data.errors));
+        return;
+      }
+
       if (!data.orders || data.orders.length === 0) { hasMore = false; break; }
 
       allOrders = allOrders.concat(data.orders);
@@ -740,6 +905,8 @@ async function loadOrders() {
     }
 
     processOrders(allOrders);
+  fetchImages();
+  fetchDaysToSell();
 
   } catch(e) {
     showError('Failed to load orders: ' + e.message);
@@ -771,19 +938,31 @@ function processOrders(orders) {
     const key = username.toLowerCase();
 
     if (!BUYERS[key]) {
-      BUYERS[key] = { username, name, addrLine1: street, addrLine2, note, orderNumber: orderId, items: [] };
+      BUYERS[key] = { username, name, addrLine1: street, addrLine2, note, orderNumber: orderId, orderIds: [], items: [] };
+    }
+
+    // Track all order IDs for this buyer (they may have multiple separate orders)
+    if (orderId && !BUYERS[key].orderIds.includes(orderId)) {
+      BUYERS[key].orderIds.push(orderId);
     }
 
     (order.lineItems || []).forEach(item => {
+      const lineItemId = item.lineItemId || '';
+      // Prevent duplicate line items from appearing
+      if (lineItemId && BUYERS[key].items.some(i => i.lineItemId === lineItemId)) return;
       const imageUrl = item.lineItemImageUrl || item.image?.imageUrl || '';
       BUYERS[key].items.push({
         title: item.title || '',
         shelf: item.sku || item.customLabel || '',
-        itemId: item.legacyItemId || item.lineItemId || '',
+        itemId: item.legacyItemId || '',
+        lineItemId,
+        orderId: orderId,
         imageUrl,
         postage: shipping?.shippingServiceCode || order.shippingFulfillments?.[0]?.shippingServiceCode || '',
         qty: String(item.quantity || 1),
         price: item.lineItemCost?.value || '',
+        saleDate: order.creationDate || '',
+        daysToSell: null,
       });
     });
   });
@@ -792,10 +971,105 @@ function processOrders(orders) {
 }
 
 // ── RENDER ──
+async function fetchDaysToSell() {
+  const items = [];
+  Object.values(BUYERS).forEach(b => {
+    b.items.forEach((item, itemIdx) => {
+      if (item.itemId && item.saleDate) {
+        const cardIdx = b._idx;
+        items.push({ itemId: item.itemId, saleDate: item.saleDate, cardIdx, itemIdx });
+      }
+    });
+  });
+
+  for (let i = 0; i < items.length; i += 5) {
+    const batch = items.slice(i, i + 5);
+    await Promise.all(batch.map(async ({ itemId, saleDate, cardIdx, itemIdx }) => {
+      try {
+        const resp = await fetch(`${PROXY}/listing`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ access_token: accessToken, item_id: itemId })
+        });
+        const data = await resp.json();
+        if (data.startDate) {
+          const start = new Date(data.startDate);
+          const sale = new Date(saleDate);
+          const days = Math.round((sale - start) / (1000 * 60 * 60 * 24));
+          const el = document.getElementById(`dts-${cardIdx}-${itemIdx}`);
+          if (el) {
+            el.textContent = days === 0 ? 'Sold day 1' : `Sold in ${days}d`;
+          }
+        }
+      } catch(e) {}
+    }));
+  }
+}
+
+async function fetchImages() {
+  // Collect all unique item IDs
+  const items = [];
+  Object.values(BUYERS).forEach(b => {
+    b.items.forEach(item => {
+      if (item.itemId && !item.imageUrl) {
+        items.push({ buyer: b.username.toLowerCase(), itemId: item.itemId, title: item.title });
+      }
+    });
+  });
+
+  if (items.length === 0) return;
+
+  // Fetch in batches of 5 to avoid hammering the API
+  for (let i = 0; i < items.length; i += 5) {
+    const batch = items.slice(i, i + 5);
+    await Promise.all(batch.map(async item => {
+      try {
+        const resp = await fetch(`${PROXY}/image`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ access_token: accessToken, item_id: item.itemId })
+        });
+        const data = await resp.json();
+        if (data.imageUrl) {
+          // Update the buyer's item imageUrl
+          const b = BUYERS[item.buyer];
+          if (b) {
+            const found = b.items.find(i => i.itemId === item.itemId);
+            if (found) {
+              found.imageUrl = data.imageUrl;
+              // Update the img tag in the DOM
+              updateItemImage(item.itemId, data.imageUrl);
+            }
+          }
+        }
+      } catch(e) {}
+    }));
+  }
+}
+
+function updateItemImage(itemId, imageUrl) {
+  // Find all item rows with this itemId link and update the placeholder
+  document.querySelectorAll(`.item-thumb-placeholder`).forEach(placeholder => {
+    const row = placeholder.closest('.item-row');
+    if (!row) return;
+    const link = row.querySelector(`a[href*="${itemId}"]`);
+    if (!link) return;
+    // Replace placeholder with actual image
+    const img = document.createElement('img');
+    img.className = 'item-thumb';
+    img.src = imageUrl;
+    img.alt = '';
+    img.loading = 'lazy';
+    img.onerror = function() { this.style.display='none'; placeholder.style.display='flex'; };
+    placeholder.parentNode.insertBefore(img, placeholder);
+    placeholder.style.display = 'none';
+  });
+}
+
 function renderAll() {
   const isParcel = b => {
-    const hasParcelPost = b.items.some(i => (i.postage||'').toLowerCase().includes('parcel'));
-    const untrackedCount = b.items.filter(i => !(i.postage||'').toLowerCase().includes('parcel')).length;
+    const hasParcelPost = b.items.some(i => (i.postage||'').toLowerCase().includes('parcel') || (i.postage||'').toLowerCase().includes('au_regular'));
+    const untrackedCount = b.items.filter(i => !(i.postage||'').toLowerCase().includes('parcel') && !(i.postage||'').toLowerCase().includes('au_regular') || (i.postage||'').toLowerCase().includes('au_regular')).length;
     return hasParcelPost || untrackedCount >= 3;
   };
 
@@ -824,6 +1098,10 @@ function renderAll() {
   document.querySelectorAll('.btn-copy').forEach(btn => {
     btn.addEventListener('click', function() { copyAddress(this.dataset.id, this); });
   });
+  document.querySelectorAll('.btn-print').forEach(btn => {
+    btn.addEventListener('click', function() { printDymoLabel(this.dataset.id, this); });
+  });
+
   document.querySelectorAll('.btn-edit').forEach(btn => {
     btn.addEventListener('click', function() {
       document.getElementById('edit-form-' + this.dataset.id).classList.toggle('open');
@@ -844,12 +1122,12 @@ function renderAll() {
 function buildCard(b, idx, type) {
   const isParcel = type === 'parcel';
   const isMulti = b.items.length > 1;
-  const hasUntracked = b.items.some(i => !(i.postage||'').toLowerCase().includes('parcel'));
+  const hasUntracked = b.items.some(i => !(i.postage||'').toLowerCase().includes('parcel') && !(i.postage||'').toLowerCase().includes('au_regular') || (i.postage||'').toLowerCase().includes('au_regular'));
   const showLabel = !isParcel || hasUntracked;
-  const isOversize = !b.items.some(i => (i.postage||'').toLowerCase().includes('parcel')) && b.items.length >= 3;
+  const isOversize = !b.items.some(i => (i.postage||'').toLowerCase().includes('parcel') || (i.postage||'').toLowerCase().includes('au_regular')) && b.items.length >= 3;
 
-  const itemsHtml = b.items.map(item => {
-    const isParcelItem = (item.postage||'').toLowerCase().includes('parcel');
+  const itemsHtml = b.items.map((item, itemIdx) => {
+    const isParcelItem = (item.postage||'').toLowerCase().includes('parcel') || (item.postage||'').toLowerCase().includes('au_regular');
     const thumb = item.imageUrl
       ? `<img class="item-thumb" src="${esc(item.imageUrl)}" alt="" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`
       : '';
@@ -866,9 +1144,23 @@ function buildCard(b, idx, type) {
             ${titleEl}
           </div>
           <div class="item-postage">${isParcelItem ? '<span class="parcel-label">📦 Parcel Post</span>' : esc(item.postage || 'Untracked')}</div>
+          ${item.price ? `<div class="item-price">$${esc(item.price)}</div>` : ''}
+          <div class="days-to-sell" id="dts-${idx}-${itemIdx}"></div>
         </div>
       </li>`;
   }).join('');
+
+  const ausPostBtn = isParcel ? `
+    <select class="satchel-select" id="satchel-${idx}">
+      <option value="">— Select satchel size —</option>
+      <option value="XS">Extra Small Satchel (1kg)</option>
+      <option value="S">Small Satchel (3kg)</option>
+      <option value="M">Medium Satchel (5kg)</option>
+      <option value="L">Large Satchel (8kg)</option>
+    </select>
+    <button class="btn-auspost-csv" onclick="downloadAusPostCSV(${idx})">⬇ Download Aus Post CSV</button>
+    <a class="btn-auspost" href="https://auspost.com.au/mypost-business/orders/draft/" target="_blank">📮 Open MyPost Business</a>
+  ` : '';
 
   const labelHtml = showLabel ? `
     <div class="label-preview" id="label-${idx}">
@@ -896,8 +1188,14 @@ function buildCard(b, idx, type) {
     <button class="action-btn btn-edit" data-id="${idx}">✏ Edit Label</button>
   ` : `<div class="parcel-note">Label printed<br>via Aus Post</div>`;
 
-  const shippedBtn = b.orderNumber
-    ? `<button class="action-btn btn-shipped" data-id="${idx}" data-order="${esc(b.orderNumber)}">📦 Mark as Shipped</button>`
+  const lineItemIds = b.items.map(i => i.lineItemId).filter(Boolean).join(',');
+  const allOrderIds = (b.orderIds && b.orderIds.length > 0 ? b.orderIds : [b.orderNumber]).filter(Boolean).join(',');
+  const shippedBtn = allOrderIds
+    ? `<button class="action-btn btn-shipped" data-id="${idx}" data-order="${esc(allOrderIds)}" data-lineitems="${esc(lineItemIds)}">📦 Mark as Shipped</button>`
+    : '';
+
+  const printBtn = showLabel
+    ? `<button class="action-btn btn-print" data-id="${idx}">🖨 Print Label</button>`
     : '';
 
   return `
@@ -915,12 +1213,20 @@ function buildCard(b, idx, type) {
             ${isOversize ? `<span class="badge badge-oversize">📦 3+ items → Parcel</span>` : ''}
             ${isParcel && isMulti ? `<span class="badge badge-count">${b.items.length} items</span>` : ''}
           </div>
+          <div class="buyer-header" style="margin-bottom:6px;">
+            ${b.items.length > 1 && b.items.some(i => i.price) ? (() => {
+              const total = b.items.reduce((sum, i) => sum + (parseFloat(i.price) || 0), 0);
+              return `<span class="order-total">Total: $${total.toFixed(2)}</span>`;
+            })() : ''}
+          </div>
           <div class="buyer-addr">${esc(b.addrLine1)}${b.addrLine2 ? ' · ' + esc(b.addrLine2) : ''}</div>
           <ul class="item-list">${itemsHtml}</ul>
           ${b.note ? `<div class="buyer-note"><strong>📝 Buyer Note</strong>${esc(b.note)}</div>` : ''}
         </div>
         <div class="label-panel">
           ${labelHtml}
+          ${ausPostBtn}
+          ${printBtn}
           ${shippedBtn}
         </div>
       </div>
@@ -928,16 +1234,172 @@ function buildCard(b, idx, type) {
 }
 
 // ── ACTIONS ──
-function markShipped(idx) {
+async function printDymoLabel(idx, btn) {
+  const b = getBuyerByIdx(idx);
+  if (!b) return;
+
+  btn.textContent = '⏳ Printing...';
+  btn.classList.add('printing');
+  btn.disabled = true;
+
+  const name = b.name;
+  const addr1 = b.addrLine1;
+  const addr2 = b.addrLine2;
+
+  // Build Dymo XML label — 54mm x 101mm (S0722400 = Address label)
+  const xmlEsc = str => String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&apos;');
+  const fontInfo = (text) => `<TextSpan>
+              <Text>${xmlEsc(text)}</Text>
+              <FontInfo>
+                <FontName>Comic Sans MS</FontName>
+                <FontSize>20.9</FontSize>
+                <IsBold>True</IsBold>
+                <IsItalic>False</IsItalic>
+                <IsUnderline>False</IsUnderline>
+                <FontBrush>
+                  <SolidColorBrush>
+                    <Color A="1" R="0" G="0" B="0"></Color>
+                  </SolidColorBrush>
+                </FontBrush>
+              </FontInfo>
+            </TextSpan>`;
+
+  const makeLines = (...lines) => ['SEND TO:', ...lines].filter(Boolean).map(l => `<LineTextSpan>${fontInfo(l)}</LineTextSpan>`).join('\n');
+
+  const labelXml = `<?xml version="1.0" encoding="utf-8"?>
+<DesktopLabel Version="1">
+  <DYMOLabel Version="3">
+    <Description>DYMO Label</Description>
+    <Orientation>Landscape</Orientation>
+    <LabelName>Shipping S0722430</LabelName>
+    <InitialLength>0</InitialLength>
+    <BorderStyle>SolidLine</BorderStyle>
+    <DYMORect>
+      <DYMOPoint><X>0.2133333</X><Y>0.06</Y></DYMOPoint>
+      <Size><Width>3.696667</Width><Height>2.026667</Height></Size>
+    </DYMORect>
+    <BorderColor>
+      <SolidColorBrush><Color A="1" R="0" G="0" B="0"></Color></SolidColorBrush>
+    </BorderColor>
+    <BorderThickness>1</BorderThickness>
+    <Show_Border>False</Show_Border>
+    <DynamicLayoutManager>
+      <RotationBehavior>ClearObjects</RotationBehavior>
+      <LabelObjects>
+        <TextObject>
+          <Name>ITextObject0</Name>
+          <Brushes>
+            <BackgroundBrush><SolidColorBrush><Color A="0" R="0" G="0" B="0"></Color></SolidColorBrush></BackgroundBrush>
+            <BorderBrush><SolidColorBrush><Color A="1" R="0" G="0" B="0"></Color></SolidColorBrush></BorderBrush>
+            <StrokeBrush><SolidColorBrush><Color A="1" R="0" G="0" B="0"></Color></SolidColorBrush></StrokeBrush>
+            <FillBrush><SolidColorBrush><Color A="0" R="0" G="0" B="0"></Color></SolidColorBrush></FillBrush>
+          </Brushes>
+          <Rotation>Rotation0</Rotation>
+          <OutlineThickness>1</OutlineThickness>
+          <IsOutlined>False</IsOutlined>
+          <BorderStyle>SolidLine</BorderStyle>
+          <Margin><DYMOThickness Left="0" Top="0" Right="0" Bottom="0" /></Margin>
+          <HorizontalAlignment>Left</HorizontalAlignment>
+          <VerticalAlignment>Middle</VerticalAlignment>
+          <FitMode>AlwaysFit</FitMode>
+          <IsVertical>False</IsVertical>
+          <FormattedText>
+            <FitMode>AlwaysFit</FitMode>
+            <HorizontalAlignment>Left</HorizontalAlignment>
+            <VerticalAlignment>Middle</VerticalAlignment>
+            <IsVertical>False</IsVertical>
+            ${makeLines(name, addr1, addr2)}
+          </FormattedText>
+          <ObjectLayout>
+            <DYMOPoint><X>0.2233333</X><Y>0.07</Y></DYMOPoint>
+            <Size><Width>3.696667</Width><Height>2.020001</Height></Size>
+          </ObjectLayout>
+        </TextObject>
+      </LabelObjects>
+    </DynamicLayoutManager>
+  </DYMOLabel>
+  <LabelApplication>Blank</LabelApplication>
+  <DataTable><Columns></Columns><Rows></Rows></DataTable>
+</DesktopLabel>`;
+
+  try {
+    // Route through local proxy to avoid mixed content blocking
+    const printResp = await fetch(`${PROXY}/print`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ labelXml })
+    });
+
+    const result = await printResp.json();
+    if (result.success) {
+      btn.textContent = '✅ Printed!';
+      btn.classList.remove('printing');
+      btn.classList.add('printed');
+      setTimeout(() => {
+        btn.textContent = '🖨 Print Label';
+        btn.classList.remove('printed');
+        btn.disabled = false;
+      }, 3000);
+    } else {
+      throw new Error('Print failed: ' + printResp.status);
+    }
+  } catch(e) {
+    btn.textContent = '❌ Print Failed';
+    btn.classList.remove('printing');
+    btn.disabled = false;
+    console.error('Dymo error:', e);
+    alert('Print error: ' + e.message + '\n\nMake sure Dymo software is running and you have accepted the certificate at http://localhost:41951');
+  }
+}
+
+async function markShipped(idx) {
   const btn = document.querySelector(`.btn-shipped[data-id="${idx}"]`);
   const orderNumber = btn?.dataset.order;
-  if (orderNumber) {
-    window.open('https://www.ebay.com.au/sh/ord/details?orderid=' + encodeURIComponent(orderNumber), '_blank');
+  if (!orderNumber) return;
+
+  btn.textContent = '⏳ Marking...';
+  btn.disabled = true;
+
+  try {
+    const allLineItems = (btn.dataset.lineitems || '').split(',').filter(Boolean);
+    const allOrderIds = (btn.dataset.order || '').split(',').filter(Boolean);
+    const b = getBuyerByIdx(idx);
+
+    // Ship each order separately
+    let allSuccess = true;
+    for (const ordId of allOrderIds) {
+      // Get line items belonging to this specific order
+      const orderLineItems = b ? b.items.filter(i => i.orderId === ordId).map(i => i.lineItemId).filter(Boolean) : allLineItems;
+      const lineItemIds = orderLineItems.length > 0 ? orderLineItems : allLineItems;
+
+      const resp = await fetch(`${PROXY}/ship`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ access_token: accessToken, order_id: ordId, line_item_ids: lineItemIds })
+      });
+      const data = await resp.json();
+      if (!data.success && data.status !== 201) { allSuccess = false; }
+    }
+
+    if (allSuccess) {
+      btn.textContent = '✅ Shipped!';
+      btn.classList.add('done');
+      btn.disabled = true;
+      setTimeout(() => {
+        const card = document.getElementById('card-' + idx);
+        if (card) card.classList.add('collapsed');
+      }, 800);
+    } else {
+      btn.textContent = '❌ Failed — try again';
+      btn.disabled = false;
+      console.error('Ship error:', data);
+      alert('Could not mark as shipped: ' + JSON.stringify(data.body || data));
+    }
+  } catch(e) {
+    btn.textContent = '❌ Error';
+    btn.disabled = false;
+    alert('Error: ' + e.message);
   }
-  setTimeout(() => {
-    const card = document.getElementById('card-' + idx);
-    if (card) card.classList.add('collapsed');
-  }, 600);
 }
 
 function copyAddress(idx, btn) {
@@ -979,8 +1441,8 @@ function getBuyerByIdx(idx) {
 // ── OPEN ALL ORDERS ──
 function openAllOrders() {
   const isParcelBuyer = b => {
-    const hasParcel = b.items.some(i => (i.postage||'').toLowerCase().includes('parcel'));
-    const untracked = b.items.filter(i => !(i.postage||'').toLowerCase().includes('parcel')).length;
+    const hasParcel = b.items.some(i => (i.postage||'').toLowerCase().includes('parcel') || (i.postage||'').toLowerCase().includes('au_regular') || (i.postage||'').toLowerCase().includes('au_regular'));
+    const untracked = b.items.filter(i => !(i.postage||'').toLowerCase().includes('parcel') && !(i.postage||'').toLowerCase().includes('au_regular') || (i.postage||'').toLowerCase().includes('au_regular') && !(i.postage||'').toLowerCase().includes('au_regular')).length;
     return hasParcel || untracked >= 3;
   };
   _allOrders = Object.values(BUYERS)
@@ -1083,6 +1545,200 @@ tfoot td{padding-top:8mm;font-size:9pt;color:#555;text-align:right}</style></hea
 }
 
 // ── UTILS ──
+function runSearch(query) {
+  const q = query.trim().toLowerCase();
+  const cards = document.querySelectorAll('.buyer-card');
+  let visible = 0;
+
+  cards.forEach(card => {
+    if (!q) {
+      card.classList.remove('search-hidden');
+      visible++;
+      return;
+    }
+    const text = card.textContent.toLowerCase();
+    if (text.includes(q)) {
+      card.classList.remove('search-hidden');
+      // Expand if collapsed so match is visible
+      card.classList.remove('collapsed');
+      visible++;
+    } else {
+      card.classList.add('search-hidden');
+    }
+  });
+
+  const countEl = document.getElementById('search-count');
+  if (q) {
+    countEl.textContent = visible + ' match' + (visible !== 1 ? 'es' : '') + ' for "' + query.trim() + '"';
+  } else {
+    countEl.textContent = '';
+  }
+
+  // Show/hide section headings if all cards in section hidden
+  document.querySelectorAll('.section').forEach(section => {
+    const visibleCards = section.querySelectorAll('.buyer-card:not(.search-hidden)');
+    section.style.display = visibleCards.length > 0 || !q ? 'block' : 'none';
+  });
+}
+
+function getSatchelDetails(size) {
+  const details = {
+    'XS': { service: 'Parcel Post', packaging: 'Satchel', length: '22', width: '8',  height: '5',  weight: '0.5' },
+    'S':  { service: 'Parcel Post', packaging: 'Satchel', length: '35', width: '22', height: '8',  weight: '3'   },
+    'M':  { service: 'Parcel Post', packaging: 'Satchel', length: '41', width: '28', height: '13', weight: '5'   },
+    'L':  { service: 'Parcel Post', packaging: 'Satchel', length: '51', width: '43', height: '21', weight: '8'   },
+  };
+  return details[size] || details['S'];
+}
+
+function downloadAusPostCSV(idx) {
+  const b = getBuyerByIdx(idx);
+  if (!b) return;
+
+  const satchelEl = document.getElementById('satchel-' + idx);
+  const satchelSize = satchelEl ? satchelEl.value : '';
+  if (!satchelSize) {
+    alert('Please select a satchel size first!');
+    return;
+  }
+
+  const details = getSatchelDetails(satchelSize);
+  const csv = buildAusPostCSV([{ buyer: b, details }]);
+  downloadCSV(csv, `auspost_${b.name.replace(/\s+/g,'_')}.csv`);
+}
+
+function buildAusPostCSV(shipments) {
+  const headers = [
+    'Additional Label Information 1',
+    'Send Tracking Notifications',
+    'Send From Name',
+    'Send From Business Name',
+    'Send From Address Line 1',
+    'Send From Address Line 2',
+    'Send From Address Line 3',
+    'Send From Suburb',
+    'Send From State',
+    'Send From Postcode',
+    'Send From Phone Number',
+    'Send From Email Address',
+    'Deliver To Name',
+    'Deliver To MyPost Number',
+    'Deliver To Business Name',
+    'Deliver To Type Of Address',
+    'Deliver To Address Line 1',
+    'Deliver To Address Line 2',
+    'Deliver To Address Line 3',
+    'Deliver To Suburb',
+    'Deliver To State',
+    'Deliver To Postcode',
+    'Deliver To Phone Number',
+    'Deliver To Email Address',
+    'Item Packaging Type',
+    'Item Delivery Service',
+    'Item Description',
+    'Item Length',
+    'Item Width',
+    'Item Height',
+    'Item Weight',
+    'Item Dangerous Goods Flag',
+    'Schedule 8 or medicinal cannabis',
+    'Signature On Delivery',
+    'Extra Cover Amount'
+  ];
+
+  const csvRows = [headers.join(',')];
+
+  shipments.forEach(({ buyer: b, details }) => {
+    // Parse addrLine2: "Suburb STATE Postcode"
+    const parts = (b.addrLine2 || '').trim().split(' ');
+    const postcode = parts.length > 0 ? parts[parts.length - 1] : '';
+    const state = parts.length > 1 ? parts[parts.length - 2] : '';
+    const suburb = parts.slice(0, parts.length - 2).join(' ');
+
+    const row = [
+      '',                    // Additional Label Information 1
+      'No',                  // Send Tracking Notifications
+      'GameJunkie',          // Send From Name
+      '',                    // Send From Business Name
+      '13 Susan Ave',        // Send From Address Line 1
+      '',                    // Send From Address Line 2
+      '',                    // Send From Address Line 3
+      'Kippa-Ring',          // Send From Suburb
+      'QLD',                 // Send From State
+      '4021',                // Send From Postcode
+      '',                    // Send From Phone Number
+      '',                    // Send From Email Address
+      csvEsc(b.name),        // Deliver To Name
+      '',                    // Deliver To MyPost Number
+      '',                    // Deliver To Business Name
+      'Residential',         // Deliver To Type Of Address
+      csvEsc(b.addrLine1),   // Deliver To Address Line 1
+      '',                    // Deliver To Address Line 2
+      '',                    // Deliver To Address Line 3
+      csvEsc(suburb),        // Deliver To Suburb
+      csvEsc(state),         // Deliver To State
+      csvEsc(postcode),      // Deliver To Postcode
+      '',                    // Deliver To Phone Number
+      '',                    // Deliver To Email Address
+      details.packaging,     // Item Packaging Type
+      details.service,       // Item Delivery Service
+      'DVD',                 // Item Description
+      details.length,        // Item Length
+      details.width,         // Item Width
+      details.height,        // Item Height
+      details.weight,        // Item Weight
+      'No',                  // Item Dangerous Goods Flag
+      'No',                  // Schedule 8 or medicinal cannabis
+      'No',                  // Signature On Delivery
+      ''                     // Extra Cover Amount
+    ];
+    csvRows.push(row.join(','));
+  });
+
+  return csvRows.join('\n');
+}
+
+function downloadAllParcelsCSV() {
+  const isParcelBuyer = b => {
+    const hasParcel = b.items.some(i => (i.postage||'').toLowerCase().includes('parcel') || (i.postage||'').toLowerCase().includes('au_regular'));
+    const untracked = b.items.filter(i => !(i.postage||'').toLowerCase().includes('parcel') && !(i.postage||'').toLowerCase().includes('au_regular')).length;
+    return hasParcel || untracked >= 3;
+  };
+
+  const parcels = Object.values(BUYERS).filter(isParcelBuyer);
+  if (parcels.length === 0) { alert('No parcel orders found.'); return; }
+
+  // Use selected satchel size per card, default to Small
+  const shipments = parcels.map(b => {
+    const cardIdx = b._idx;
+    const satchelEl = document.getElementById('satchel-' + cardIdx);
+    const size = satchelEl ? satchelEl.value || 'S' : 'S';
+    return { buyer: b, details: getSatchelDetails(size) };
+  });
+
+  const csv = buildAusPostCSV(shipments);
+  downloadCSV(csv, `auspost_parcels_${new Date().toISOString().slice(0,10)}.csv`);
+}
+
+function csvEsc(val) {
+  if (!val) return '';
+  const s = String(val);
+  if (s.includes(',') || s.includes('"') || s.includes('\n')) {
+    return '"' + s.replace(/"/g, '""') + '"';
+  }
+  return s;
+}
+
+function downloadCSV(csv, filename) {
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
 function titleCase(str) {
   if (!str) return '';
   const UPPER = new Set(['NSW','VIC','QLD','SA','WA','TAS','NT','ACT','PO','GPO']);
@@ -1110,7 +1766,8 @@ function showAuth() {
   document.getElementById('loading-screen').style.display = 'none';
   document.getElementById('stats-bar').style.display = 'none';
   document.getElementById('main').style.display = 'none';
-  ['open-all-btn','pick-list-btn','refresh-btn'].forEach(id => document.getElementById(id).style.display = 'none');
+  ['open-all-btn','pick-list-btn','refresh-btn','auspost-all-btn'].forEach(id => document.getElementById(id).style.display = 'none');
+  document.getElementById('search-bar').style.display = 'none';
 }
 
 function showLoading(msg) {
@@ -1127,7 +1784,8 @@ function showMain() {
   document.getElementById('error-bar').style.display = 'none';
   document.getElementById('stats-bar').style.display = 'flex';
   document.getElementById('main').style.display = 'block';
-  ['open-all-btn','pick-list-btn','refresh-btn'].forEach(id => document.getElementById(id).style.display = 'block');
+  ['open-all-btn','pick-list-btn','refresh-btn','auspost-all-btn'].forEach(id => document.getElementById(id).style.display = 'block');
+  document.getElementById('search-bar').style.display = 'block';
 }
 
 function showError(msg) {
