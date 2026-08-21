@@ -1582,11 +1582,13 @@ function runSearch(query) {
 }
 
 function getSatchelDetails(size) {
+  // Weights only — no dimensions needed for MyPost Business satchels
+  // Product ID must match your MyPost Business account (Settings > CSV import)
   const details = {
-    'XS': { service: 'Parcel Post', packaging: 'Satchel', length: '22', width: '8',  height: '5',  weight: '0.5' },
-    'S':  { service: 'Parcel Post', packaging: 'Satchel', length: '35', width: '22', height: '8',  weight: '3'   },
-    'M':  { service: 'Parcel Post', packaging: 'Satchel', length: '41', width: '28', height: '13', weight: '5'   },
-    'L':  { service: 'Parcel Post', packaging: 'Satchel', length: '51', width: '43', height: '21', weight: '8'   },
+    'XS': { weight: '0.5', label: 'Extra Small Satchel' },
+    'S':  { weight: '3',   label: 'Small Satchel' },
+    'M':  { weight: '5',   label: 'Medium Satchel' },
+    'L':  { weight: '8',   label: 'Large Satchel' },
   };
   return details[size] || details['S'];
 }
@@ -1608,6 +1610,7 @@ function downloadAusPostCSV(idx) {
 }
 
 function buildAusPostCSV(shipments) {
+  // Exact columns from MyPost Business domestic template
   const headers = [
     'Additional Label Information 1',
     'Send Tracking Notifications',
@@ -1671,7 +1674,7 @@ function buildAusPostCSV(shipments) {
       csvEsc(b.name),        // Deliver To Name
       '',                    // Deliver To MyPost Number
       '',                    // Deliver To Business Name
-      'STANDARD_ADDRESS',    // Deliver To Type Of Address
+      '',                    // Deliver To Type Of Address (leave blank for MyPost Business)
       csvEsc(b.addrLine1),   // Deliver To Address Line 1
       '',                    // Deliver To Address Line 2
       '',                    // Deliver To Address Line 3
@@ -1680,12 +1683,12 @@ function buildAusPostCSV(shipments) {
       csvEsc(postcode),      // Deliver To Postcode
       '',                    // Deliver To Phone Number
       '',                    // Deliver To Email Address
-      details.packaging,     // Item Packaging Type
-      'PP',                  // Item Delivery Service
-      'DVD',                 // Item Description
-      details.length,        // Item Length
-      details.width,         // Item Width
-      details.height,        // Item Height
+      '',                    // Item Packaging Type (N/A for Aus Post)
+      '',                    // Item Delivery Service (leave blank - MyPost selects automatically)
+      csvEsc(details.label), // Item Description
+      '',                    // Item Length (optional for MyPost Business)
+      '',                    // Item Width
+      '',                    // Item Height
       details.weight,        // Item Weight
       'No',                  // Item Dangerous Goods Flag
       'No',                  // Schedule 8 or medicinal cannabis
