@@ -1153,10 +1153,11 @@ function buildCard(b, idx, type) {
   const ausPostBtn = isParcel ? `
     <select class="satchel-select" id="satchel-${idx}">
       <option value="">— Select satchel size —</option>
-      <option value="XS">Extra Small Satchel (1kg)</option>
-      <option value="S">Small Satchel (3kg)</option>
-      <option value="M">Medium Satchel (5kg)</option>
-      <option value="L">Large Satchel (8kg)</option>
+      <option value="XS">Extra Small Satchel (up to 250g)</option>
+      <option value="S">Small Satchel (up to 500g)</option>
+      <option value="M">Medium Satchel (up to 1kg)</option>
+      <option value="L">Large Satchel (up to 3kg)</option>
+      <option value="XL">Extra Large Satchel (up to 5kg)</option>
     </select>
     <button class="btn-auspost-csv" onclick="downloadAusPostCSV(${idx})">⬇ Download Aus Post CSV</button>
     <a class="btn-auspost" href="https://auspost.com.au/mypost-business/orders/draft/" target="_blank">📮 Open MyPost Business</a>
@@ -1582,11 +1583,14 @@ function runSearch(query) {
 }
 
 function getSatchelDetails(size) {
+  // Correct AP satchel sizes as of Aug 2025:
+  // XS=250g, S=500g, M=1kg, L=3kg, XL=5kg
   const details = {
-    'XS': { packagingType: 'AP_SATCHEL_XS', weight: '0.5', label: 'Extra Small Satchel (up to 500g)' },
-    'S':  { packagingType: 'AP_SATCHEL_S',  weight: '3',   label: 'Small Satchel (up to 3kg)' },
-    'M':  { packagingType: 'AP_SATCHEL_M',  weight: '5',   label: 'Medium Satchel (up to 5kg)' },
-    'L':  { packagingType: 'AP_SATCHEL_L',  weight: '8',   label: 'Large Satchel (up to 8kg)' },
+    'XS': { packagingType: 'AP_SATCHEL_XS', weight: '0.25', label: 'Extra Small Satchel (up to 250g)' },
+    'S':  { packagingType: 'AP_SATCHEL_S',  weight: '0.5',  label: 'Small Satchel (up to 500g)' },
+    'M':  { packagingType: 'AP_SATCHEL_M',  weight: '1',    label: 'Medium Satchel (up to 1kg)' },
+    'L':  { packagingType: 'AP_SATCHEL_L',  weight: '3',    label: 'Large Satchel (up to 3kg)' },
+    'XL': { packagingType: 'AP_SATCHEL_XL', weight: '5',    label: 'Extra Large Satchel (up to 5kg)' },
   };
   return details[size] || details['S'];
 }
@@ -1651,10 +1655,15 @@ function buildAusPostCSV(shipments) {
 
   shipments.forEach(({ buyer: b, details }) => {
     // Parse addrLine2: "Suburb STATE Postcode"
-    const parts = (b.addrLine2 || '').trim().split(' ');
+    const addr2 = (b.addrLine2 || '').trim();
+    const parts = addr2.split(' ');
     const postcode = parts.length > 0 ? parts[parts.length - 1] : '';
     const state = parts.length > 1 ? parts[parts.length - 2] : '';
     const suburb = parts.slice(0, parts.length - 2).join(' ');
+
+    // Skip overseas addresses (no valid AU state)
+    const auStates = ['NSW','VIC','QLD','SA','WA','TAS','NT','ACT'];
+    if (!auStates.includes(state.toUpperCase())) return; // skip non-AU addresses
 
     const row = [
       '',                    // Additional Label Information 1
