@@ -1671,7 +1671,7 @@ function buildAusPostCSV(shipments) {
       csvEsc(b.name),        // Deliver To Name
       '',                    // Deliver To MyPost Number
       '',                    // Deliver To Business Name
-      'Residential',         // Deliver To Type Of Address
+      'STANDARD_ADDRESS',    // Deliver To Type Of Address
       csvEsc(b.addrLine1),   // Deliver To Address Line 1
       '',                    // Deliver To Address Line 2
       '',                    // Deliver To Address Line 3
@@ -1681,7 +1681,7 @@ function buildAusPostCSV(shipments) {
       '',                    // Deliver To Phone Number
       '',                    // Deliver To Email Address
       details.packaging,     // Item Packaging Type
-      details.service,       // Item Delivery Service
+      'PP',                  // Item Delivery Service
       'DVD',                 // Item Description
       details.length,        // Item Length
       details.width,         // Item Width
