@@ -1722,13 +1722,17 @@ async function submitTracking(idx) {
   if (!tracking) { alert('Please enter a tracking number.'); return; }
 
   // Extract tracking from GS1-128 barcode if scanned
-  // Barcode format: 01{GTIN-14}91{tracking} or similar
-  // Real tracking starts with 997 and is 18-23 digits
+  // Format: 01{GTIN-14}91{tracking} — extract everything after AI 91
   if (tracking.length > 23) {
-    const trackMatch = tracking.match(/(997\d{15,20})/);
-    if (trackMatch) {
-      tracking = trackMatch[1];
+    // Find AI(91) application identifier — appears after 01+14digits
+    const ai91idx = tracking.indexOf('91', 16);
+    if (ai91idx !== -1 && tracking.substring(ai91idx+2).startsWith('997')) {
+      tracking = tracking.substring(ai91idx + 2);
       input.value = tracking;
+    } else {
+      // Fallback: find 997 anywhere in the barcode
+      const trackMatch = tracking.match(/(997\d{15,20})/);
+      if (trackMatch) { tracking = trackMatch[1]; input.value = tracking; }
     }
   }
 
