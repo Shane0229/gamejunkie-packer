@@ -1750,16 +1750,30 @@ function buildAusPostCSV(shipments) {
   const csvRows = [headers.join(',')];
 
   shipments.forEach(({ buyer: b, details }) => {
-    // Parse addrLine2: "Suburb STATE Postcode"
     const addr2 = (b.addrLine2 || '').trim();
-    const parts = addr2.split(' ');
-    const postcode = parts.length > 0 ? parts[parts.length - 1] : '';
-    const state = parts.length > 1 ? parts[parts.length - 2] : '';
-    const suburb = parts.slice(0, parts.length - 2).join(' ');
+
+    // Normalise full state names to abbreviations before parsing
+    const stateNames = {
+      'NEW SOUTH WALES': 'NSW', 'VICTORIA': 'VIC', 'QUEENSLAND': 'QLD',
+      'SOUTH AUSTRALIA': 'SA', 'WESTERN AUSTRALIA': 'WA', 'TASMANIA': 'TAS',
+      'NORTHERN TERRITORY': 'NT', 'AUSTRALIAN CAPITAL TERRITORY': 'ACT'
+    };
+    let addr2clean = addr2.toUpperCase();
+    for (const [full, abbr] of Object.entries(stateNames)) {
+      addr2clean = addr2clean.replace(full, abbr);
+    }
+    // Now restore original case for suburb, use normalised for state/postcode
+    const cleanParts = addr2clean.trim().split(' ');
+    const postcode = cleanParts.length > 0 ? cleanParts[cleanParts.length - 1] : '';
+    const state = cleanParts.length > 1 ? cleanParts[cleanParts.length - 2] : '';
+    const suburb = cleanParts.slice(0, cleanParts.length - 2).join(' ');
 
     // Skip overseas addresses (no valid AU state)
     const auStates = ['NSW','VIC','QLD','SA','WA','TAS','NT','ACT'];
-    if (!auStates.includes(state.toUpperCase())) return; // skip non-AU addresses
+    if (!auStates.includes(state.toUpperCase())) {
+      console.log('Skipping overseas address:', b.name, b.addrLine2);
+      return;
+    }
 
     const row = [
       '',                    // Additional Label Information 1
