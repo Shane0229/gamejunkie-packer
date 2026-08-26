@@ -974,7 +974,8 @@ function processOrders(orders) {
     const key = username.toLowerCase();
 
     if (!BUYERS[key]) {
-      BUYERS[key] = { username, name, addrLine1: street, addrLine2, note, orderNumber: orderId, orderIds: [], items: [] };
+      const phone = shipping?.shipTo?.primaryPhone?.phoneNumber || '';
+      BUYERS[key] = { username, name, addrLine1: street, addrLine2, note, orderNumber: orderId, orderIds: [], phone, items: [] };
     }
 
     // Track all order IDs for this buyer (they may have multiple separate orders)
@@ -1189,11 +1190,11 @@ function buildCard(b, idx, type) {
   const ausPostBtn = isParcel ? `
     <select class="satchel-select" id="satchel-${idx}">
       <option value="">— Select satchel size —</option>
-      <option value="XS">Extra Small Satchel (up to 250g)</option>
-      <option value="S">Small Satchel (up to 500g)</option>
-      <option value="M">Medium Satchel (up to 1kg)</option>
-      <option value="L">Large Satchel (up to 3kg)</option>
-      <option value="XL">Extra Large Satchel (up to 5kg)</option>
+      <option value="XS">Extra Small Satchel</option>
+      <option value="S">Small Satchel</option>
+      <option value="M">Medium Satchel</option>
+      <option value="L">Large Satchel</option>
+      <option value="XL">Extra Large Satchel</option>
     </select>
     <button class="btn-auspost-csv" onclick="downloadAusPostCSV(${idx})">⬇ Download Aus Post CSV</button>
     <div class="tracking-input-wrap">
@@ -1878,7 +1879,7 @@ function buildAusPostCSV(shipments) {
     }
 
     const row = [
-      '',                    // Additional Label Information 1
+      csvEsc(b.orderNumber || ''), // Additional Label Information 1 (eBay order ref)
       'No',                  // Send Tracking Notifications
       'GameJunkie',          // Send From Name
       '',                    // Send From Business Name
@@ -1900,7 +1901,7 @@ function buildAusPostCSV(shipments) {
       csvEsc(suburb),        // Deliver To Suburb
       csvEsc(state),         // Deliver To State
       csvEsc(postcode),      // Deliver To Postcode
-      '',                    // Deliver To Phone Number
+      csvEsc(b.phone || ''), // Deliver To Phone Number
       '',                    // Deliver To Email Address
       details.packagingType, // Item Packaging Type (e.g. AP_SATCHEL_S)
       'PP',                  // Item Delivery Service - Parcel Post
