@@ -535,6 +535,40 @@
   .btn-print.printing { background: var(--grey-300); color: var(--grey-600); }
   .btn-print.printed { background: var(--green); color: #fff; }
 
+  .tracking-input-wrap {
+    width: 100%;
+    display: flex;
+    gap: 6px;
+    margin-top: 4px;
+  }
+
+  .tracking-input {
+    flex: 1;
+    padding: 7px 8px;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    border: 1.5px solid var(--grey-300);
+    border-radius: 6px;
+    background: var(--white);
+    color: var(--grey-800);
+    min-width: 0;
+  }
+  .tracking-input:focus { border-color: var(--green); outline: none; }
+
+  .tracking-submit-btn {
+    padding: 7px 10px;
+    background: var(--green);
+    color: #fff;
+    font-weight: 700;
+    font-size: 11px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .tracking-submit-btn:hover { opacity: 0.88; }
+
   .satchel-select {
     width: 100%;
     padding: 7px 8px;
@@ -1162,6 +1196,10 @@ function buildCard(b, idx, type) {
       <option value="XL">Extra Large Satchel (up to 5kg)</option>
     </select>
     <button class="btn-auspost-csv" onclick="downloadAusPostCSV(${idx})">⬇ Download Aus Post CSV</button>
+    <div class="tracking-input-wrap">
+      <input type="text" class="tracking-input" id="tracking-${idx}" placeholder="Enter tracking number..." />
+      <button class="tracking-submit-btn" onclick="submitTracking(${idx})">✓ Send</button>
+    </div>
   ` : '';
 
   const labelHtml = showLabel ? `
@@ -1676,6 +1714,66 @@ async function handleTrackingPDF(input) {
   }
 
   btn.textContent = '📄 Upload Tracking PDF';
+}
+
+async function submitTracking(idx) {
+  const input = document.getElementById('tracking-' + idx);
+  let tracking = (input ? input.value : '').trim();
+  if (!tracking) { alert('Please enter a tracking number.'); return; }
+
+  // Extract tracking from GS1-128 barcode if scanned
+  // Barcode format: 01{GTIN-14}91{tracking} or similar
+  // Real tracking starts with 997 and is 18-23 digits
+  if (tracking.length > 23) {
+    const trackMatch = tracking.match(/(997\d{15,20})/);
+    if (trackMatch) {
+      tracking = trackMatch[1];
+      input.value = tracking;
+    }
+  }
+
+  const btn = input.nextElementSibling;
+  btn.textContent = '⏳';
+  btn.disabled = true;
+
+  const b = getBuyerByIdx(idx);
+  if (!b) { btn.textContent = '✓ Send'; btn.disabled = false; return; }
+
+  const orderIds = b.orderIds && b.orderIds.length > 0 ? b.orderIds : [b.orderNumber];
+  let allSuccess = true;
+
+  for (const orderId of orderIds.filter(Boolean)) {
+    const lineItemIds = b.items.filter(i => i.orderId === orderId).map(i => i.lineItemId).filter(Boolean);
+    try {
+      const resp = await fetch(`${PROXY}/shipwithtracking`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          access_token: accessToken,
+          order_id: orderId,
+          line_item_ids: lineItemIds.length > 0 ? lineItemIds : b.items.map(i => i.lineItemId).filter(Boolean),
+          tracking_number: tracking,
+          carrier: 'AustraliaPost'
+        })
+      });
+      const data = await resp.json();
+      if (!data.success && data.status !== 201) { allSuccess = false; }
+    } catch(e) { allSuccess = false; }
+  }
+
+  if (allSuccess) {
+    btn.textContent = '✅';
+    input.style.borderColor = 'var(--green)';
+    setTimeout(() => {
+      const card = document.getElementById('card-' + idx);
+      if (card) card.classList.add('collapsed');
+    }, 800);
+  } else {
+    btn.textContent = '❌';
+    btn.disabled = false;
+    setTimeout(() => { btn.textContent = '✓ Send'; }, 2000);
+    alert('Failed to update eBay. Check the proxy is running.');
+  }
 }
 
 function getSatchelDetails(size) {
