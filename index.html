@@ -1202,13 +1202,13 @@ function buildCard(b, idx, type) {
   }).join('');
 
   const ausPostBtn = isParcel ? `
-    <select class="satchel-select" id="satchel-${idx}">
-      <option value="">— Select satchel size —</option>
-      <option value="XS">Extra Small Satchel</option>
-      <option value="S">Small Satchel</option>
-      <option value="M">Medium Satchel</option>
-      <option value="L">Large Satchel</option>
-      <option value="XL">Extra Large Satchel</option>
+    <select class="satchel-select" id="satchel-${idx}" onchange="saveSatchelSize('${esc(b.username)}', this.value)" value="${esc(b._satchelSize || '')}">
+      <option value="" ${!b._satchelSize ? 'selected' : ''}>— Select satchel size —</option>
+      <option value="XS" ${b._satchelSize === 'XS' ? 'selected' : ''}>Extra Small Satchel</option>
+      <option value="S" ${b._satchelSize === 'S' ? 'selected' : ''}>Small Satchel</option>
+      <option value="M" ${b._satchelSize === 'M' ? 'selected' : ''}>Medium Satchel</option>
+      <option value="L" ${b._satchelSize === 'L' ? 'selected' : ''}>Large Satchel</option>
+      <option value="XL" ${b._satchelSize === 'XL' ? 'selected' : ''}>Extra Large Satchel</option>
     </select>
     <button class="btn-auspost-csv" onclick="downloadAusPostCSV(${idx})">⬇ Download Aus Post CSV</button>
     <div class="tracking-input-wrap">
@@ -1232,8 +1232,9 @@ function buildCard(b, idx, type) {
     </div>
     <div class="edit-form" id="edit-form-${idx}">
       <input type="text" id="edit-name-${idx}" value="${esc(b.name)}" placeholder="Name">
-      <input type="text" id="edit-addr1-${idx}" value="${esc(b.addrLine1)}" placeholder="Street">
-      <input type="text" id="edit-addr2-${idx}" value="${esc(b.addrLine2)}" placeholder="Suburb State Postcode">
+      <input type="text" id="edit-addr1-${idx}" value="${esc(b.addrLine1)}" placeholder="Street address line 1">
+      <input type="text" id="edit-addr2-${idx}" value="" placeholder="Street address line 2 (optional)">
+      <input type="text" id="edit-addr3-${idx}" value="${esc(b.addrLine2)}" placeholder="Suburb State Postcode">
       <div class="edit-form-btns">
         <button class="edit-save" data-id="${idx}">✓ Save</button>
         <button class="edit-cancel" data-id="${idx}">✕</button>
@@ -1473,8 +1474,11 @@ function saveEdit(idx) {
   const b = getBuyerByIdx(idx);
   if (!b) return;
   b.name = document.getElementById('edit-name-' + idx).value.trim();
-  b.addrLine1 = document.getElementById('edit-addr1-' + idx).value.trim();
-  b.addrLine2 = document.getElementById('edit-addr2-' + idx).value.trim();
+  const a1 = document.getElementById('edit-addr1-' + idx).value.trim();
+  const a2 = document.getElementById('edit-addr2-' + idx).value.trim();
+  const a3 = document.getElementById('edit-addr3-' + idx).value.trim();
+  b.addrLine1 = a2 ? a1 + ', ' + a2 : a1;
+  b.addrLine2 = a3;
   const preview = document.getElementById('label-' + idx);
   if (preview) {
     preview.querySelector('.label-to-name').textContent = b.name;
@@ -1732,6 +1736,11 @@ async function handleTrackingPDF(input) {
   btn.textContent = '📄 Upload Tracking PDF';
 }
 
+function saveSatchelSize(username, size) {
+  const key = username.toLowerCase();
+  if (BUYERS[key]) BUYERS[key]._satchelSize = size;
+}
+
 function upgradeToParcel(username) {
   const key = username.toLowerCase();
   const b = BUYERS[key];
@@ -1929,8 +1938,8 @@ function buildAusPostCSV(shipments) {
       '',                    // Deliver To MyPost Number
       '',                    // Deliver To Business Name
       '',                    // Deliver To Type Of Address (leave blank for MyPost Business)
-      csvEsc(b.addrLine1),   // Deliver To Address Line 1
-      '',                    // Deliver To Address Line 2
+      csvEsc((b.addrLine1 || '').substring(0, 40)),  // Deliver To Address Line 1
+      csvEsc((b.addrLine1 || '').length > 40 ? (b.addrLine1 || '').substring(40, 80) : ''), // Deliver To Address Line 2
       '',                    // Deliver To Address Line 3
       csvEsc(suburb),        // Deliver To Suburb
       csvEsc(state),         // Deliver To State
@@ -1974,9 +1983,12 @@ function downloadAllParcelsCSV() {
 
   // Use selected satchel size per card, default to Small
   const shipments = parcels.map(b => {
-    const cardIdx = b._idx;
-    const satchelEl = document.getElementById('satchel-' + cardIdx);
-    const size = satchelEl ? satchelEl.value : '';
+    // Use saved satchel size (from BUYERS object) or fall back to DOM
+    const size = b._satchelSize || (() => {
+      const cardIdx = b._idx;
+      const satchelEl = document.getElementById('satchel-' + cardIdx);
+      return satchelEl ? satchelEl.value : '';
+    })();
     if (!size) return null; // skip if no size selected
     return { buyer: b, details: getSatchelDetails(size) };
   }).filter(Boolean); // remove nulls
@@ -1988,6 +2000,7 @@ function downloadAllParcelsCSV() {
 
   const csv = buildAusPostCSV(shipments);
   downloadCSV(csv, `auspost_parcels_${new Date().toISOString().slice(0,10)}.csv`);
+  alert(`✅ Exported ${shipments.length} order${shipments.length !== 1 ? 's' : ''} to CSV!\n\nNote: Orders without a satchel size selected were skipped.`);
 }
 
 function csvEsc(val) {
