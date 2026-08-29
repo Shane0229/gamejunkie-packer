@@ -535,6 +535,20 @@
   .btn-print.printing { background: var(--grey-300); color: var(--grey-600); }
   .btn-print.printed { background: var(--green); color: #fff; }
 
+  .upgrade-parcel-btn {
+    display: inline-block;
+    margin-top: 8px;
+    font-size: 11px;
+    color: var(--orange);
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    font-family: 'DM Sans', sans-serif;
+    text-decoration: underline dotted;
+  }
+  .upgrade-parcel-btn:hover { color: var(--yellow-dark); }
+
   .tracking-input-wrap {
     width: 100%;
     display: flex;
@@ -1263,6 +1277,7 @@ function buildCard(b, idx, type) {
           <div class="buyer-addr">${esc(b.addrLine1)}${b.addrLine2 ? ' · ' + esc(b.addrLine2) : ''}</div>
           <ul class="item-list">${itemsHtml}</ul>
           ${b.note ? `<div class="buyer-note"><strong>📝 Buyer Note</strong>${esc(b.note)}</div>` : ''}
+          ${!isParcel ? `<button class="upgrade-parcel-btn" onclick="upgradeToParcel('${esc(b.username)}')">📦 Send as Parcel</button>` : ''}
         </div>
         <div class="label-panel">
           ${labelHtml}
@@ -1715,6 +1730,25 @@ async function handleTrackingPDF(input) {
   }
 
   btn.textContent = '📄 Upload Tracking PDF';
+}
+
+function upgradeToParcel(username) {
+  const key = username.toLowerCase();
+  const b = BUYERS[key];
+  if (!b) return;
+
+  // Mark all items as parcel post
+  b.items.forEach(item => { item.postage = 'AU_AusPostParcelDelivery'; });
+  b._upgraded = true;
+
+  // Re-render all sections
+  renderAll();
+
+  // Scroll to parcel section
+  setTimeout(() => {
+    const parcelSection = document.getElementById('parcel-section');
+    if (parcelSection) parcelSection.scrollIntoView({ behavior: 'smooth' });
+  }, 300);
 }
 
 async function submitTracking(idx) {
