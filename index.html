@@ -1920,12 +1920,9 @@ function downloadIntlCSV(idx) {
     '','','','',''
   ];
 
-  const csv = [headers.join(','), row.join(',')].join('
-');
+  const csv = [headers.join(','), row.join(',')].join('\n');
   downloadCSV(csv, `auspost_intl_${b.name.replace(/\s+/g,'_')}.csv`);
-  alert('Downloaded international CSV for ' + b.name + '
-
-Remember to open in Excel and upload to MyPost Business.');
+  alert('Downloaded international CSV for ' + b.name + '\n\nRemember to open in Excel and upload to MyPost Business.');
 }
 
 function saveSatchelSize(username, size) {
