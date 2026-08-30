@@ -2333,9 +2333,19 @@ function showError(msg) {
 // ── INIT ──
 if (refreshToken) {
   showLoading('Reconnecting to eBay...');
+  // Timeout after 10 seconds in case proxy is slow
+  const initTimeout = setTimeout(() => {
+    showAuth();
+    setStatus('Connection timed out — please sign in again.', 'error');
+  }, 10000);
   refreshAccessToken().then(ok => {
+    clearTimeout(initTimeout);
     if (ok) loadOrders();
     else { showAuth(); setStatus('Session expired — please sign in again.', 'error'); }
+  }).catch(() => {
+    clearTimeout(initTimeout);
+    showAuth();
+    setStatus('Connection failed — please sign in again.', 'error');
   });
 }
 </script>
