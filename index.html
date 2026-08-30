@@ -1259,7 +1259,7 @@ function renderAll() {
 function buildCard(b, idx, type) {
   const isParcel = type === 'parcel';
   const isMulti = b.items.length > 1;
-  const hasUntracked = b.items.some(i => !(i.postage||'').toLowerCase().includes('parcel') && !(i.postage||'').toLowerCase().includes('au_regular') || (i.postage||'').toLowerCase().includes('au_regular'));
+  const hasUntracked = b.items.some(i => !(i.postage||'').toLowerCase().includes('parcel') && !(i.postage||'').toLowerCase().includes('au_regular'));
   const showLabel = !isParcel || hasUntracked;
   const isOversize = !b.items.some(i => (i.postage||'').toLowerCase().includes('parcel') || (i.postage||'').toLowerCase().includes('au_regular')) && b.items.length >= 3;
 
@@ -1302,15 +1302,15 @@ function buildCard(b, idx, type) {
       <option value="S" ${b._satchelSize === 'S' ? 'selected' : ''}>Small Satchel</option>
       <option value="M" ${b._satchelSize === 'M' ? 'selected' : ''}>Medium Satchel</option>
       <option value="L" ${b._satchelSize === 'L' ? 'selected' : ''}>Large Satchel</option>
-      <option value="XL" ${b._satchelSize === 'XL' ? 'selected' : ''}>Extra Large Satchel</option>
-      <option value="OWN" ${b._satchelSize === 'OWN' ? 'selected' : ''}>Own Packaging</option>`;
+      <option value="XL" ${b._satchelSize === 'XL' ? 'selected' : ''}>Extra Large Satchel</option>`;
 
   const boxOptions = `
       <option value="" ${!b._satchelSize ? 'selected' : ''}>— Select box size —</option>
       <option value="BOX_S" ${b._satchelSize === 'BOX_S' ? 'selected' : ''}>Small Box</option>
       <option value="BOX_M" ${b._satchelSize === 'BOX_M' ? 'selected' : ''}>Medium Box</option>
       <option value="BOX_L" ${b._satchelSize === 'BOX_L' ? 'selected' : ''}>Large Box</option>
-      <option value="BOX_XL" ${b._satchelSize === 'BOX_XL' ? 'selected' : ''}>Extra Large Box</option>`;
+      <option value="BOX_XL" ${b._satchelSize === 'BOX_XL' ? 'selected' : ''}>Extra Large Box</option>
+      <option value="OWN" ${b._satchelSize === 'OWN' ? 'selected' : ''}>Own Packaging</option>`;
 
   const domesticBtn = `
     <div class="pkg-toggle-wrap">
@@ -1398,7 +1398,7 @@ function buildCard(b, idx, type) {
     </div>
     <button class="action-btn btn-copy" data-id="${idx}">📋 Copy Address</button>
     <button class="action-btn btn-edit" data-id="${idx}">✏ Edit Label</button>
-  ` : `<div class="parcel-note">Label printed<br>via Aus Post</div>`;
+  ` : '';
 
   const lineItemIds = b.items.map(i => i.lineItemId).filter(Boolean).join(',');
   const allOrderIds = (b.orderIds && b.orderIds.length > 0 ? b.orderIds : [b.orderNumber]).filter(Boolean).join(',');
@@ -2017,7 +2017,8 @@ function setPkgType(username, idx, type) {
         <option value="BOX_S">Small Box</option>
         <option value="BOX_M">Medium Box</option>
         <option value="BOX_L">Large Box</option>
-        <option value="BOX_XL">Extra Large Box</option>`;
+        <option value="BOX_XL">Extra Large Box</option>
+        <option value="OWN">Own Packaging</option>`;
     } else {
       sel.innerHTML = `
         <option value="">— Select satchel —</option>
@@ -2025,8 +2026,7 @@ function setPkgType(username, idx, type) {
         <option value="S">Small Satchel</option>
         <option value="M">Medium Satchel</option>
         <option value="L">Large Satchel</option>
-        <option value="XL">Extra Large Satchel</option>
-        <option value="OWN">Own Packaging</option>`;
+        <option value="XL">Extra Large Satchel</option>`;
     }
   }
 
