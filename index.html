@@ -1261,9 +1261,11 @@ function buildCard(b, idx, type) {
   }).join('');
 
   const auStates = ['NSW','VIC','QLD','SA','WA','TAS','NT','ACT'];
+  const auStateNames = ['NEW SOUTH WALES','VICTORIA','QUEENSLAND','SOUTH AUSTRALIA','WESTERN AUSTRALIA','TASMANIA','NORTHERN TERRITORY','AUSTRALIAN CAPITAL TERRITORY'];
+  const addr2Upper = (b.addrLine2 || '').toUpperCase();
   const addr2Parts = (b.addrLine2 || '').trim().split(' ');
   const possibleState = addr2Parts.length >= 2 ? addr2Parts[addr2Parts.length - 2].toUpperCase() : '';
-  const isIntl = isParcel && !auStates.includes(possibleState);
+  const isIntl = isParcel && !auStates.includes(possibleState) && !auStateNames.some(s => addr2Upper.includes(s));
 
   const domesticBtn = `
     <select class="satchel-select" id="satchel-${idx}" onchange="saveSatchelSize('${esc(b.username)}', this.value)">
