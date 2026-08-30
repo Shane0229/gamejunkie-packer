@@ -549,6 +549,60 @@
   }
   .upgrade-parcel-btn:hover { color: var(--yellow-dark); }
 
+  .intl-dims-wrap {
+    width: 100%;
+    margin-top: 6px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  .intl-dims-row {
+    display: flex;
+    gap: 5px;
+    align-items: center;
+  }
+
+  .intl-dims-label {
+    font-size: 10px;
+    color: var(--grey-400);
+    width: 50px;
+    flex-shrink: 0;
+    font-family: 'DM Mono', monospace;
+  }
+
+  .intl-dims-input {
+    flex: 1;
+    padding: 5px 6px;
+    font-size: 12px;
+    font-family: 'DM Mono', monospace;
+    border: 1.5px solid var(--grey-300);
+    border-radius: 5px;
+    background: var(--white);
+    color: var(--grey-800);
+    min-width: 0;
+  }
+  .intl-dims-input:focus { border-color: var(--blue); outline: none; }
+  .intl-dims-input::placeholder { color: var(--grey-300); }
+
+  .btn-intl-csv {
+    background: #1a5fa8;
+    color: #fff;
+    width: 100%;
+    padding: 8px 0;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    border-radius: 6px;
+    cursor: pointer;
+    border: none;
+    text-align: center;
+    display: block;
+    transition: opacity 0.15s;
+    margin-top: 2px;
+  }
+  .btn-intl-csv:hover { opacity: 0.88; }
+
   .tracking-input-wrap {
     width: 100%;
     display: flex;
@@ -728,7 +782,7 @@
   </div>
   <div id="header-right">
     <button class="header-btn" id="auspost-mpb-btn" onclick="window.open('https://auspost.com.au/mypost-business/orders/draft/','_blank')" style="background:#c00;color:#fff;display:none;">📮 MyPost Business</button>
-    <label class="header-btn" id="tracking-upload-btn" style="background:#1a5fa8;color:#fff;display:none;cursor:pointer;">📄 Upload Tracking PDF<input type="file" accept=".pdf" style="display:none" onchange="handleTrackingPDF(this)"></label>
+    <label class="header-btn" id="tracking-upload-btn" style="background:#1a5fa8;color:#fff;display:none;cursor:pointer;"><span id="tracking-upload-text">📄 Upload Tracking PDF</span><input type="file" accept=".pdf" style="display:none" onchange="handleTrackingPDF(this)"></label>
     <button class="header-btn" id="auspost-all-btn" onclick="downloadAllParcelsCSV()" style="background:#e21e26;color:#fff;display:none;">⬇ Aus Post CSV</button>
     <button class="header-btn green" id="open-all-btn" onclick="openAllOrders()">📦 Open All in eBay</button>
     <button class="header-btn yellow" id="pick-list-btn" onclick="printPickList()">🖨 Print Pick List</button>
@@ -966,6 +1020,7 @@ async function loadOrders() {
 // ── PROCESS ORDERS ──
 function processOrders(orders) {
   Object.keys(BUYERS).forEach(k => delete BUYERS[k]);
+  localStorage.removeItem('gj_parcel_data'); // fresh day, clear saved parcel data
 
   orders.forEach(order => {
     const buyer = order.buyer;
@@ -989,7 +1044,8 @@ function processOrders(orders) {
 
     if (!BUYERS[key]) {
       const phone = shipping?.shipTo?.primaryPhone?.phoneNumber || '';
-      BUYERS[key] = { username, name, addrLine1: street, addrLine2, note, orderNumber: orderId, orderIds: [], phone, items: [] };
+      const country = shipping?.shipTo?.contactAddress?.countryCode || addr?.countryCode || 'AU';
+      BUYERS[key] = { username, name, addrLine1: street, addrLine2, note, orderNumber: orderId, orderIds: [], phone, country, items: [] };
     }
 
     // Track all order IDs for this buyer (they may have multiple separate orders)
@@ -1153,6 +1209,9 @@ function renderAll() {
     btn.addEventListener('click', function() { printDymoLabel(this.dataset.id, this); });
   });
 
+  // Restore saved parcel data (satchel sizes and dimensions)
+  restoreParcelData();
+
   document.querySelectorAll('.btn-edit').forEach(btn => {
     btn.addEventListener('click', function() {
       document.getElementById('edit-form-' + this.dataset.id).classList.toggle('open');
@@ -1201,8 +1260,13 @@ function buildCard(b, idx, type) {
       </li>`;
   }).join('');
 
-  const ausPostBtn = isParcel ? `
-    <select class="satchel-select" id="satchel-${idx}" onchange="saveSatchelSize('${esc(b.username)}', this.value)" value="${esc(b._satchelSize || '')}">
+  const auStates = ['NSW','VIC','QLD','SA','WA','TAS','NT','ACT'];
+  const addr2Parts = (b.addrLine2 || '').trim().split(' ');
+  const possibleState = addr2Parts.length >= 2 ? addr2Parts[addr2Parts.length - 2].toUpperCase() : '';
+  const isIntl = isParcel && !auStates.includes(possibleState);
+
+  const domesticBtn = `
+    <select class="satchel-select" id="satchel-${idx}" onchange="saveSatchelSize('${esc(b.username)}', this.value)">
       <option value="" ${!b._satchelSize ? 'selected' : ''}>— Select satchel size —</option>
       <option value="XS" ${b._satchelSize === 'XS' ? 'selected' : ''}>Extra Small Satchel</option>
       <option value="S" ${b._satchelSize === 'S' ? 'selected' : ''}>Small Satchel</option>
@@ -1213,9 +1277,41 @@ function buildCard(b, idx, type) {
     <button class="btn-auspost-csv" onclick="downloadAusPostCSV(${idx})">⬇ Download Aus Post CSV</button>
     <div class="tracking-input-wrap">
       <input type="text" class="tracking-input" id="tracking-${idx}" placeholder="Enter tracking number..." />
-      <button class="tracking-submit-btn" onclick="submitTracking(${idx})">✓ Send</button>
+      <button class="tracking-submit-btn" onclick="submitTracking(${idx})">\u2713 Send</button>
+    </div>`;
+
+  const intlBtn = `
+    <div class="intl-dims-wrap">
+      <div style="font-size:11px;font-weight:700;color:var(--blue);margin-bottom:3px;">\uD83C\uDF0F International — enter dimensions</div>
+      <div class="intl-dims-row">
+        <span class="intl-dims-label">L (cm)</span>
+        <input type="number" class="intl-dims-input" id="intl-l-${idx}" placeholder="30" oninput="saveIntlDims(${idx})">
+        <span class="intl-dims-label">W (cm)</span>
+        <input type="number" class="intl-dims-input" id="intl-w-${idx}" placeholder="20" oninput="saveIntlDims(${idx})">
+      </div>
+      <div class="intl-dims-row">
+        <span class="intl-dims-label">H (cm)</span>
+        <input type="number" class="intl-dims-input" id="intl-h-${idx}" placeholder="5" oninput="saveIntlDims(${idx})">
+        <span class="intl-dims-label">Wt (kg)</span>
+        <input type="number" class="intl-dims-input" id="intl-wt-${idx}" placeholder="0.5" step="0.1" oninput="saveIntlDims(${idx})">
+      </div>
+      <div class="intl-dims-row">
+        <span class="intl-dims-label">Value $</span>
+        <input type="number" class="intl-dims-input" id="intl-val-${idx}" placeholder="AUD" oninput="saveIntlDims(${idx})">
+        <span class="intl-dims-label">Service</span>
+        <select class="intl-dims-input" id="intl-svc-${idx}" onchange="saveIntlDims(${idx})">
+          <option value="STD">Standard</option>
+          <option value="EXP">Express</option>
+        </select>
+      </div>
     </div>
-  ` : '';
+    <button class="btn-intl-csv" onclick="downloadIntlCSV(${idx})">\u2B07 Download Int&apos;l CSV</button>
+    <div class="tracking-input-wrap">
+      <input type="text" class="tracking-input" id="tracking-${idx}" placeholder="Enter tracking number..." />
+      <button class="tracking-submit-btn" onclick="submitTracking(${idx})">\u2713 Send</button>
+    </div>`;
+
+  const ausPostBtn = isParcel ? (isIntl ? intlBtn : domesticBtn) : '';
 
   const labelHtml = showLabel ? `
     <div class="label-preview" id="label-${idx}">
@@ -1646,7 +1742,7 @@ async function handleTrackingPDF(input) {
   if (!file) return;
   input.value = '';
 
-  const btn = document.getElementById('tracking-upload-btn');
+  const btn = document.getElementById('tracking-upload-text');
   btn.textContent = '⏳ Processing...';
 
   try {
@@ -1736,9 +1832,162 @@ async function handleTrackingPDF(input) {
   btn.textContent = '📄 Upload Tracking PDF';
 }
 
+function downloadIntlCSV(idx) {
+  const b = getBuyerByIdx(idx);
+  if (!b) return;
+
+  // Get from DOM first, fall back to localStorage
+  const savedData = loadParcelData();
+  const savedDims = b ? (savedData[b.username.toLowerCase()]?.dims || {}) : {};
+  const l = document.getElementById('intl-l-' + idx)?.value || savedDims.l || '';
+  const w = document.getElementById('intl-w-' + idx)?.value || savedDims.w || '';
+  const h = document.getElementById('intl-h-' + idx)?.value || savedDims.h || '';
+  const wt = document.getElementById('intl-wt-' + idx)?.value || savedDims.wt || '';
+  const val = document.getElementById('intl-val-' + idx)?.value || savedDims.val || '';
+  const svc = document.getElementById('intl-svc-' + idx)?.value || savedDims.svc || 'STD';
+
+  if (!l || !w || !h || !wt) {
+    alert('Please enter all dimensions (L, W, H, Weight) before downloading.');
+    return;
+  }
+
+  // Parse country from addrLine2 — for international, the full address is stored differently
+  // Try to get country from eBay order data
+  const country = b.country || 'Unknown';
+
+  // Build international CSV
+  const headers = [
+    'Send From Name','Send From Business Name','Send From Address Line 1','Send From Address Line 2',
+    'Send From Address Line 3','Send From Suburb','Send From State','Send From Postcode',
+    'Send From Phone Number','Send From Email Address',
+    'Deliver To Name','Deliver To MyPost Number','Deliver To Business Name','Deliver To Type Of Address',
+    'Deliver To Country','Deliver To Address Line 1','Deliver To Address Line 2','Deliver To Address Line 3',
+    'Deliver To Suburb','Deliver To State','Deliver To Postcode','Deliver To Phone Number','Deliver To Email Address',
+    'Item Packaging Type','Item Delivery Service','Item Description',
+    'Item Length','Item Width','Item Height','Item Weight',
+    'Item Dangerous Goods Flag','Schedule 8 or medicinal cannabis','Signature On Delivery','Extra Cover Amount',
+    'Cannot Be Delivered - Return To Sender / Abandon Parcel',
+    'Customs Declaration - Commercial Value','Customs Declaration - Reason For Export',
+    'Customs Declaration - Why Are You Exporting These Goods','Export Declaration Number',
+    'SMS Tracking Notifications','SMS Tracking Mobile Phone',
+    'Parcel Contents - Description','Parcel Contents - Weight','Parcel Contents - Value','Parcel Contents - Quantity',
+    'Parcel Contents - Country Of Origin','Parcel Contents - HS Tariff',
+    'Parcel 2 Contents - Description','Parcel 2 Contents - Weight','Parcel 2 Contents - Value',
+    'Parcel 2 Contents - Quantity','Parcel 2 Contents - Country Of Origin','Parcel 2 Contents - HS Tariff',
+    'Parcel 3 Contents - Description','Parcel 3 Contents - Weight','Parcel 3 Contents - Value',
+    'Parcel 3 Contents - Quantity','Parcel 3 Contents - Country Of Origin','Parcel 3 Contents - HS Tariff',
+    'Parcel 4 Contents - Description','Parcel 4 Contents - Weight','Parcel 4 Contents - Value',
+    'Parcel 4 Contents - Quantity','Parcel 4 Contents - Country Of Origin','Parcel 4 Contents - HS Tariff',
+    'Send Tracking Notifications','Send Tracking Email','Additional Label Information 1',
+    'Delivery Instructions','Comments','Landed Costs Payer',
+    "Sender's Customs Reference","Importer's Reference Number",'Licence Numbers','Certificate Numbers','Invoice Numbers'
+  ];
+
+  // Parse address for international
+  const addr1 = (b.addrLine1 || '').substring(0, 40);
+  const fullAddr2 = b.addrLine2 || '';
+  // For international addrLine2 may be "City COUNTRY Postcode" or just the address
+  const addr2parts = fullAddr2.trim().split(' ');
+  const postcode = addr2parts[addr2parts.length - 1] || '';
+  const suburb = addr2parts.slice(0, -1).join(' ') || fullAddr2;
+
+  // Auto-detect description from items
+  const titles = b.items.map(i => i.title || '').join(' ').toUpperCase();
+  const hasCD = titles.includes(' CD') || titles.includes('MUSIC') || titles.includes('ALBUM');
+  const hasDVD = titles.includes('DVD') || titles.includes('BLU-RAY');
+  const desc = hasCD && hasDVD ? 'DVDs and CDs' : hasCD ? 'CDs' : 'DVDs';
+
+  const row = [
+    'GameJunkie','','13 Susan Ave','','','Kippa-Ring','QLD','4021','','',
+    csvEsc(b.name),'','','',
+    csvEsc(b.country || ''),
+    csvEsc(addr1),'','',
+    csvEsc(suburb),'',csvEsc(postcode),csvEsc(b.phone || ''),'',
+    'OWN_PACKAGING',svc,desc,
+    l,w,h,wt,
+    'No','No','No','',
+    'RETURN',
+    'No','SALE_OF_GOODS',
+    'Sale of used DVDs and CDs','',
+    'No','',
+    desc,wt,val || '1','1',
+    'AU','',
+    '','','','','','',
+    '','','','','','',
+    '','','','','','',
+    'No','','',
+    '','','',
+    '','','','',''
+  ];
+
+  const csv = [headers.join(','), row.join(',')].join('
+');
+  downloadCSV(csv, `auspost_intl_${b.name.replace(/\s+/g,'_')}.csv`);
+  alert('Downloaded international CSV for ' + b.name + '
+
+Remember to open in Excel and upload to MyPost Business.');
+}
+
 function saveSatchelSize(username, size) {
   const key = username.toLowerCase();
   if (BUYERS[key]) BUYERS[key]._satchelSize = size;
+  // Persist to localStorage
+  const saved = JSON.parse(localStorage.getItem('gj_parcel_data') || '{}');
+  if (!saved[key]) saved[key] = {};
+  saved[key].satchelSize = size;
+  localStorage.setItem('gj_parcel_data', JSON.stringify(saved));
+}
+
+function restoreParcelData() {
+  const saved = loadParcelData();
+  Object.entries(saved).forEach(([key, data]) => {
+    const b = BUYERS[key];
+    if (!b) return;
+    const idx = b._idx;
+    if (idx === undefined) return;
+
+    // Restore satchel size
+    if (data.satchelSize) {
+      b._satchelSize = data.satchelSize;
+      const el = document.getElementById('satchel-' + idx);
+      if (el) el.value = data.satchelSize;
+    }
+
+    // Restore international dimensions
+    if (data.dims) {
+      const d = data.dims;
+      const setVal = (id, val) => { const el = document.getElementById(id); if (el) el.value = val; };
+      setVal('intl-l-' + idx, d.l);
+      setVal('intl-w-' + idx, d.w);
+      setVal('intl-h-' + idx, d.h);
+      setVal('intl-wt-' + idx, d.wt);
+      setVal('intl-val-' + idx, d.val);
+      setVal('intl-svc-' + idx, d.svc);
+    }
+  });
+}
+
+function saveIntlDims(idx) {
+  const b = getBuyerByIdx(idx);
+  if (!b) return;
+  const key = b.username.toLowerCase();
+  const dims = {
+    l: document.getElementById('intl-l-' + idx)?.value || '',
+    w: document.getElementById('intl-w-' + idx)?.value || '',
+    h: document.getElementById('intl-h-' + idx)?.value || '',
+    wt: document.getElementById('intl-wt-' + idx)?.value || '',
+    val: document.getElementById('intl-val-' + idx)?.value || '',
+    svc: document.getElementById('intl-svc-' + idx)?.value || 'STD',
+  };
+  const saved = JSON.parse(localStorage.getItem('gj_parcel_data') || '{}');
+  if (!saved[key]) saved[key] = {};
+  saved[key].dims = dims;
+  localStorage.setItem('gj_parcel_data', JSON.stringify(saved));
+}
+
+function loadParcelData() {
+  const saved = JSON.parse(localStorage.getItem('gj_parcel_data') || '{}');
+  return saved;
 }
 
 function upgradeToParcel(username) {
