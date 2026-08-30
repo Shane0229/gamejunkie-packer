@@ -1274,7 +1274,6 @@ function buildCard(b, idx, type) {
       <option value="L" ${b._satchelSize === 'L' ? 'selected' : ''}>Large Satchel</option>
       <option value="XL" ${b._satchelSize === 'XL' ? 'selected' : ''}>Extra Large Satchel</option>
     </select>
-    <button class="btn-auspost-csv" onclick="downloadAusPostCSV(${idx})">⬇ Download Aus Post CSV</button>
     <div class="tracking-input-wrap">
       <input type="text" class="tracking-input" id="tracking-${idx}" placeholder="Enter tracking number..." />
       <button class="tracking-submit-btn" onclick="submitTracking(${idx})">\u2713 Send</button>
@@ -1297,7 +1296,7 @@ function buildCard(b, idx, type) {
       </div>
       <div class="intl-dims-row">
         <span class="intl-dims-label">Value $</span>
-        <input type="number" class="intl-dims-input" id="intl-val-${idx}" placeholder="AUD" oninput="saveIntlDims(${idx})">
+        <input type="number" class="intl-dims-input" id="intl-val-${idx}" value="${parseFloat(b.items.reduce((s,i) => s + (parseFloat(i.price)||0), 0)).toFixed(2)}" oninput="saveIntlDims(${idx})">
         <span class="intl-dims-label">Service</span>
         <select class="intl-dims-input" id="intl-svc-${idx}" onchange="saveIntlDims(${idx})">
           <option value="STD">Standard</option>
@@ -1305,7 +1304,7 @@ function buildCard(b, idx, type) {
         </select>
       </div>
     </div>
-    <button class="btn-intl-csv" onclick="downloadIntlCSV(${idx})">\u2B07 Download Int&apos;l CSV</button>
+
     <div class="tracking-input-wrap">
       <input type="text" class="tracking-input" id="tracking-${idx}" placeholder="Enter tracking number..." />
       <button class="tracking-submit-btn" onclick="submitTracking(${idx})">\u2713 Send</button>
