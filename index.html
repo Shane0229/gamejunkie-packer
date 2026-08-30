@@ -549,6 +549,33 @@
   }
   .upgrade-parcel-btn:hover { color: var(--yellow-dark); }
 
+  .pkg-toggle-wrap {
+    width: 100%;
+    display: flex;
+    gap: 6px;
+    margin-bottom: 4px;
+  }
+
+  .pkg-toggle-btn {
+    flex: 1;
+    padding: 6px 0;
+    font-size: 12px;
+    font-weight: 600;
+    font-family: 'DM Sans', sans-serif;
+    border: 1.5px solid var(--grey-300);
+    border-radius: 6px;
+    background: var(--white);
+    color: var(--grey-600);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .pkg-toggle-btn.active {
+    background: var(--black);
+    color: var(--yellow);
+    border-color: var(--black);
+  }
+
   .intl-dims-wrap {
     width: 100%;
     margin-top: 6px;
@@ -1267,15 +1294,47 @@ function buildCard(b, idx, type) {
   const possibleState = addr2Parts.length >= 2 ? addr2Parts[addr2Parts.length - 2].toUpperCase() : '';
   const isIntl = isParcel && !auStates.includes(possibleState) && !auStateNames.some(s => addr2Upper.includes(s));
 
-  const domesticBtn = `
-    <select class="satchel-select" id="satchel-${idx}" onchange="saveSatchelSize('${esc(b.username)}', this.value)">
-      <option value="" ${!b._satchelSize ? 'selected' : ''}>— Select satchel size —</option>
+  const pkgType = b._pkgType || 'satchel'; // 'satchel' or 'box'
+
+  const satchelOptions = `
+      <option value="" ${!b._satchelSize ? 'selected' : ''}>— Select satchel —</option>
       <option value="XS" ${b._satchelSize === 'XS' ? 'selected' : ''}>Extra Small Satchel</option>
       <option value="S" ${b._satchelSize === 'S' ? 'selected' : ''}>Small Satchel</option>
       <option value="M" ${b._satchelSize === 'M' ? 'selected' : ''}>Medium Satchel</option>
       <option value="L" ${b._satchelSize === 'L' ? 'selected' : ''}>Large Satchel</option>
       <option value="XL" ${b._satchelSize === 'XL' ? 'selected' : ''}>Extra Large Satchel</option>
+      <option value="OWN" ${b._satchelSize === 'OWN' ? 'selected' : ''}>Own Packaging</option>`;
+
+  const boxOptions = `
+      <option value="" ${!b._satchelSize ? 'selected' : ''}>— Select box size —</option>
+      <option value="BOX_S" ${b._satchelSize === 'BOX_S' ? 'selected' : ''}>Small Box</option>
+      <option value="BOX_M" ${b._satchelSize === 'BOX_M' ? 'selected' : ''}>Medium Box</option>
+      <option value="BOX_L" ${b._satchelSize === 'BOX_L' ? 'selected' : ''}>Large Box</option>
+      <option value="BOX_XL" ${b._satchelSize === 'BOX_XL' ? 'selected' : ''}>Extra Large Box</option>`;
+
+  const domesticBtn = `
+    <div class="pkg-toggle-wrap">
+      <button class="pkg-toggle-btn ${pkgType === 'satchel' ? 'active' : ''}" onclick="setPkgType('${esc(b.username)}', ${idx}, 'satchel')">📦 Satchel</button>
+      <button class="pkg-toggle-btn ${pkgType === 'box' ? 'active' : ''}" onclick="setPkgType('${esc(b.username)}', ${idx}, 'box')">📫 Box</button>
+    </div>
+    <select class="satchel-select" id="satchel-${idx}" onchange="saveSatchelSize('${esc(b.username)}', this.value); toggleOwnDims(${idx}, this.value)">
+      ${pkgType === 'box' ? boxOptions : satchelOptions}
     </select>
+    <div class="intl-dims-wrap" id="own-dims-${idx}" style="display:${b._satchelSize === 'OWN' ? 'flex' : 'none'}">
+      <div class="intl-dims-row">
+        <span class="intl-dims-label">L (cm)</span>
+        <input type="number" class="intl-dims-input" id="own-l-${idx}" placeholder="30" oninput="saveOwnDims(${idx})">
+        <span class="intl-dims-label">W (cm)</span>
+        <input type="number" class="intl-dims-input" id="own-w-${idx}" placeholder="20" oninput="saveOwnDims(${idx})">
+      </div>
+      <div class="intl-dims-row">
+        <span class="intl-dims-label">H (cm)</span>
+        <input type="number" class="intl-dims-input" id="own-h-${idx}" placeholder="5" oninput="saveOwnDims(${idx})">
+        <span class="intl-dims-label">Wt (kg)</span>
+        <input type="number" class="intl-dims-input" id="own-wt-${idx}" placeholder="0.5" step="0.1" oninput="saveOwnDims(${idx})">
+      </div>
+    </div>
+    <button class="btn-auspost-csv" onclick="downloadAusPostCSV(${idx})">\u2B07 Download Aus Post CSV</button>
     <div class="tracking-input-wrap">
       <input type="text" class="tracking-input" id="tracking-${idx}" placeholder="Enter tracking number..." />
       <button class="tracking-submit-btn" onclick="submitTracking(${idx})">\u2713 Send</button>
@@ -1936,6 +1995,75 @@ function saveSatchelSize(username, size) {
   localStorage.setItem('gj_parcel_data', JSON.stringify(saved));
 }
 
+function setPkgType(username, idx, type) {
+  const key = username.toLowerCase();
+  if (BUYERS[key]) {
+    BUYERS[key]._pkgType = type;
+    BUYERS[key]._satchelSize = ''; // reset selection when switching
+  }
+  // Save to localStorage
+  const saved = JSON.parse(localStorage.getItem('gj_parcel_data') || '{}');
+  if (!saved[key]) saved[key] = {};
+  saved[key].pkgType = type;
+  saved[key].satchelSize = '';
+  localStorage.setItem('gj_parcel_data', JSON.stringify(saved));
+
+  // Update the dropdown options
+  const sel = document.getElementById('satchel-' + idx);
+  if (sel) {
+    if (type === 'box') {
+      sel.innerHTML = `
+        <option value="">— Select box size —</option>
+        <option value="BOX_S">Small Box</option>
+        <option value="BOX_M">Medium Box</option>
+        <option value="BOX_L">Large Box</option>
+        <option value="BOX_XL">Extra Large Box</option>`;
+    } else {
+      sel.innerHTML = `
+        <option value="">— Select satchel —</option>
+        <option value="XS">Extra Small Satchel</option>
+        <option value="S">Small Satchel</option>
+        <option value="M">Medium Satchel</option>
+        <option value="L">Large Satchel</option>
+        <option value="XL">Extra Large Satchel</option>
+        <option value="OWN">Own Packaging</option>`;
+    }
+  }
+
+  // Update toggle button states
+  const wrap = sel?.closest('.label-panel');
+  if (wrap) {
+    wrap.querySelectorAll('.pkg-toggle-btn').forEach(btn => {
+      btn.classList.toggle('active', btn.textContent.toLowerCase().includes(type === 'box' ? 'box' : 'satchel'));
+    });
+  }
+
+  // Hide own dims if switching away
+  toggleOwnDims(idx, '');
+}
+
+function toggleOwnDims(idx, size) {
+  const wrap = document.getElementById('own-dims-' + idx);
+  if (wrap) wrap.style.display = size === 'OWN' ? 'flex' : 'none';
+}
+
+function saveOwnDims(idx) {
+  const b = getBuyerByIdx(idx);
+  if (!b) return;
+  const key = b.username.toLowerCase();
+  const dims = {
+    l: document.getElementById('own-l-' + idx)?.value || '',
+    w: document.getElementById('own-w-' + idx)?.value || '',
+    h: document.getElementById('own-h-' + idx)?.value || '',
+    wt: document.getElementById('own-wt-' + idx)?.value || '',
+  };
+  b._dims = dims;
+  const saved = JSON.parse(localStorage.getItem('gj_parcel_data') || '{}');
+  if (!saved[key]) saved[key] = {};
+  saved[key].ownDims = dims;
+  localStorage.setItem('gj_parcel_data', JSON.stringify(saved));
+}
+
 function restoreParcelData() {
   const saved = loadParcelData();
   Object.entries(saved).forEach(([key, data]) => {
@@ -1944,7 +2072,13 @@ function restoreParcelData() {
     const idx = b._idx;
     if (idx === undefined) return;
 
-    // Restore satchel size
+    // Restore package type (satchel or box)
+    if (data.pkgType && data.pkgType !== 'satchel') {
+      b._pkgType = data.pkgType;
+      setPkgType(b.username, idx, data.pkgType);
+    }
+
+    // Restore satchel/box size
     if (data.satchelSize) {
       b._satchelSize = data.satchelSize;
       const el = document.getElementById('satchel-' + idx);
@@ -1961,6 +2095,19 @@ function restoreParcelData() {
       setVal('intl-wt-' + idx, d.wt);
       setVal('intl-val-' + idx, d.val);
       setVal('intl-svc-' + idx, d.svc);
+    }
+
+    // Restore own packaging dimensions
+    if (data.ownDims) {
+      const d = data.ownDims;
+      b._dims = d;
+      const setVal = (id, val) => { const el = document.getElementById(id); if (el) el.value = val; };
+      setVal('own-l-' + idx, d.l);
+      setVal('own-w-' + idx, d.w);
+      setVal('own-h-' + idx, d.h);
+      setVal('own-wt-' + idx, d.wt);
+      // Show the dims panel if OWN is selected
+      if (b._satchelSize === 'OWN') toggleOwnDims(idx, 'OWN');
     }
   });
 }
@@ -2071,15 +2218,20 @@ async function submitTracking(idx) {
   }
 }
 
-function getSatchelDetails(size) {
+function getSatchelDetails(size, dims) {
   // Correct AP satchel sizes as of Aug 2025:
   // XS=250g, S=500g, M=1kg, L=3kg, XL=5kg
   const details = {
-    'XS': { packagingType: 'AP_SATCHEL_XS', weight: '0.25', label: 'Extra Small Satchel (up to 250g)' },
-    'S':  { packagingType: 'AP_SATCHEL_S',  weight: '0.5',  label: 'Small Satchel (up to 500g)' },
-    'M':  { packagingType: 'AP_SATCHEL_M',  weight: '1',    label: 'Medium Satchel (up to 1kg)' },
-    'L':  { packagingType: 'AP_SATCHEL_L',  weight: '3',    label: 'Large Satchel (up to 3kg)' },
-    'XL': { packagingType: 'AP_SATCHEL_XL', weight: '5',    label: 'Extra Large Satchel (up to 5kg)' },
+    'XS':  { packagingType: 'AP_SATCHEL_XS',  weight: '0.25', label: 'Extra Small Satchel', length: '', width: '', height: '' },
+    'S':   { packagingType: 'AP_SATCHEL_S',   weight: '0.5',  label: 'Small Satchel',       length: '', width: '', height: '' },
+    'M':   { packagingType: 'AP_SATCHEL_M',   weight: '1',    label: 'Medium Satchel',       length: '', width: '', height: '' },
+    'L':   { packagingType: 'AP_SATCHEL_L',   weight: '3',    label: 'Large Satchel',        length: '', width: '', height: '' },
+    'XL':  { packagingType: 'AP_SATCHEL_XL',  weight: '5',    label: 'Extra Large Satchel',  length: '', width: '', height: '' },
+    'OWN':    { packagingType: 'OWN_PACKAGING', weight: dims?.wt || '', label: 'Own Packaging',       length: dims?.l || '', width: dims?.w || '', height: dims?.h || '' },
+    'BOX_S':  { packagingType: 'AP_BOX_S',      weight: '5',            label: 'Small Box',            length: '', width: '', height: '' },
+    'BOX_M':  { packagingType: 'AP_BOX_M',      weight: '5',            label: 'Medium Box',           length: '', width: '', height: '' },
+    'BOX_L':  { packagingType: 'AP_BOX_L',      weight: '5',            label: 'Large Box',            length: '', width: '', height: '' },
+    'BOX_XL': { packagingType: 'AP_BOX_XL',     weight: '5',            label: 'Extra Large Box',      length: '', width: '', height: '' },
   };
   return details[size] || details['S'];
 }
@@ -2091,11 +2243,25 @@ function downloadAusPostCSV(idx) {
   const satchelEl = document.getElementById('satchel-' + idx);
   const satchelSize = satchelEl ? satchelEl.value : '';
   if (!satchelSize) {
-    alert('Please select a satchel size first!');
+    alert('Please select a packaging type first!');
     return;
   }
 
-  const details = getSatchelDetails(satchelSize);
+  let dims = null;
+  if (satchelSize === 'OWN') {
+    dims = {
+      l: document.getElementById('own-l-' + idx)?.value || b._dims?.l || '',
+      w: document.getElementById('own-w-' + idx)?.value || b._dims?.w || '',
+      h: document.getElementById('own-h-' + idx)?.value || b._dims?.h || '',
+      wt: document.getElementById('own-wt-' + idx)?.value || b._dims?.wt || '',
+    };
+    if (!dims.l || !dims.w || !dims.h || !dims.wt) {
+      alert('Please enter all dimensions (L, W, H, Weight) for Own Packaging.');
+      return;
+    }
+  }
+
+  const details = getSatchelDetails(satchelSize, dims);
   const csv = buildAusPostCSV([{ buyer: b, details }]);
   downloadCSV(csv, `auspost_${b.name.replace(/\s+/g,'_')}.csv`);
 }
@@ -2203,9 +2369,9 @@ function buildAusPostCSV(shipments) {
         if (hasCD) return 'CDs';
         return 'DVDs';
       })(),              // Item Description
-      '',                    // Item Length (optional for MyPost Business)
-      '',                    // Item Width
-      '',                    // Item Height
+      details.length || '',  // Item Length (required for OWN_PACKAGING)
+      details.width  || '',  // Item Width
+      details.height || '',  // Item Height
       details.weight,        // Item Weight
       'No',                  // Item Dangerous Goods Flag
       'No',                  // Schedule 8 or medicinal cannabis
@@ -2237,7 +2403,8 @@ function downloadAllParcelsCSV() {
       return satchelEl ? satchelEl.value : '';
     })();
     if (!size) return null; // skip if no size selected
-    return { buyer: b, details: getSatchelDetails(size) };
+    const dims = size === 'OWN' ? b._dims : null;
+    return { buyer: b, details: getSatchelDetails(size, dims) };
   }).filter(Boolean); // remove nulls
 
   if (shipments.length === 0) {
