@@ -1072,7 +1072,8 @@ function processOrders(orders) {
     if (!BUYERS[key]) {
       const phone = shipping?.shipTo?.primaryPhone?.phoneNumber || '';
       const country = shipping?.shipTo?.contactAddress?.countryCode || addr?.countryCode || 'AU';
-      BUYERS[key] = { username, name, addrLine1: street, addrLine2, note, orderNumber: orderId, orderIds: [], phone, country, items: [] };
+      const email = buyer?.buyerRegistrationAddress?.email || '';
+      BUYERS[key] = { username, name, addrLine1: street, addrLine2, note, orderNumber: orderId, orderIds: [], phone, email, country, items: [] };
     }
 
     // Track all order IDs for this buyer (they may have multiple separate orders)
@@ -1353,6 +1354,10 @@ function buildCard(b, idx, type) {
         <input type="number" class="intl-dims-input" id="intl-h-${idx}" placeholder="5" oninput="saveIntlDims(${idx})">
         <span class="intl-dims-label">Wt (kg)</span>
         <input type="number" class="intl-dims-input" id="intl-wt-${idx}" placeholder="0.5" step="0.1" oninput="saveIntlDims(${idx})">
+      </div>
+      <div class="intl-dims-row">
+        <span class="intl-dims-label">Email</span>
+        <input type="text" class="intl-dims-input" id="intl-email-${idx}" placeholder="buyer@email.com" oninput="saveIntlDims(${idx})" value="${esc(b.email || '')}" style="flex:2">
       </div>
       <div class="intl-dims-row">
         <span class="intl-dims-label">Value $</span>
@@ -1904,6 +1909,7 @@ function downloadIntlCSV(idx) {
   const wt = document.getElementById('intl-wt-' + idx)?.value || savedDims.wt || '';
   const val = document.getElementById('intl-val-' + idx)?.value || savedDims.val || '';
   const svc = document.getElementById('intl-svc-' + idx)?.value || savedDims.svc || 'STD';
+  const email = document.getElementById('intl-email-' + idx)?.value || savedDims.email || b.email || '';
 
   if (!l || !w || !h || !wt) {
     alert('Please enter all dimensions (L, W, H, Weight) before downloading.');
@@ -2129,6 +2135,7 @@ function saveIntlDims(idx) {
     wt: document.getElementById('intl-wt-' + idx)?.value || '',
     val: document.getElementById('intl-val-' + idx)?.value || '',
     svc: document.getElementById('intl-svc-' + idx)?.value || 'STD',
+    email: document.getElementById('intl-email-' + idx)?.value || '',
   };
   const saved = JSON.parse(localStorage.getItem('gj_parcel_data') || '{}');
   if (!saved[key]) saved[key] = {};
@@ -2364,7 +2371,7 @@ function buildAusPostCSV(shipments) {
       csvEsc(state),         // Deliver To State
       csvEsc(postcode),      // Deliver To Postcode
       csvEsc(b.phone || ''), // Deliver To Phone Number
-      '',                    // Deliver To Email Address
+      csvEsc(email),          // Deliver To Email Address
       details.packagingType, // Item Packaging Type (e.g. AP_SATCHEL_S)
       'PP',                  // Item Delivery Service - Parcel Post
       (() => {
