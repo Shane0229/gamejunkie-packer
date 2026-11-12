@@ -1495,14 +1495,14 @@ async function printDymoLabel(idx, btn) {
   // Two objects: large customer address (top 80%) + tiny return address (bottom)
   const xmlEsc = str => String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&apos;');
 
-  const addrSpan = (text, size, bold, grey) => `<LineTextSpan><TextSpan>
+  const addrSpan = (text, size, bold, grey, underline = false) => `<LineTextSpan><TextSpan>
               <Text>${xmlEsc(text)}</Text>
               <FontInfo>
                 <FontName>Arial</FontName>
                 <FontSize>${size}</FontSize>
                 <IsBold>${bold ? 'True' : 'False'}</IsBold>
                 <IsItalic>False</IsItalic>
-                <IsUnderline>False</IsUnderline>
+                <IsUnderline>${underline ? 'True' : 'False'}</IsUnderline>
                 <FontBrush><SolidColorBrush><Color A="1" R="${grey}" G="${grey}" B="${grey}"></Color></SolidColorBrush></FontBrush>
               </FontInfo>
             </TextSpan></LineTextSpan>`;
@@ -1549,8 +1549,8 @@ async function printDymoLabel(idx, btn) {
             <IsVertical>False</IsVertical>
             ${addrSpan('TO:', 8, true, '0')}
             ${addrSpan(name, 18, true, '0')}
-            ${addr1 ? addrSpan(addr1, 14, false, '0') : ''}
-            ${addr2 ? addrSpan(addr2, 14, false, '0') : ''}
+            ${addr1 && !addr2 ? addrSpan(addr1, 14, false, '0', true) : addr1 ? addrSpan(addr1, 14, false, '0') : ''}
+            ${addr2 ? addrSpan(addr2, 14, false, '0', true) : ''}
           </FormattedText>
           <ObjectLayout>
             <DYMOPoint><X>0.22</X><Y>0.07</Y></DYMOPoint>
