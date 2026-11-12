@@ -1547,16 +1547,34 @@ async function printDymoLabel(idx, btn) {
             <HorizontalAlignment>Left</HorizontalAlignment>
             <VerticalAlignment>Middle</VerticalAlignment>
             <IsVertical>False</IsVertical>
-            ${addrSpan('TO:', 9, true, '0')}
-            ${addrSpan(name, 24, true, '0')}
-            ${addr1 ? addrSpan(addr1, 16, false, '0') : ''}
-            ${addr2 ? addrSpan(addr2, 16, false, '0') : ''}
+            ${addrSpan('TO:', 8, true, '0')}
+            ${addrSpan(name, 18, true, '0')}
+            ${addr1 ? addrSpan(addr1, 14, false, '0') : ''}
+            ${addr2 ? addrSpan(addr2, 14, false, '0') : ''}
           </FormattedText>
           <ObjectLayout>
             <DYMOPoint><X>0.22</X><Y>0.07</Y></DYMOPoint>
-            <Size><Width>3.65</Width><Height>1.55</Height></Size>
+            <Size><Width>3.65</Width><Height>1.50</Height></Size>
           </ObjectLayout>
         </TextObject>
+        <LineObject>
+          <Name>Divider</Name>
+          <Brushes>
+            <BackgroundBrush><SolidColorBrush><Color A="0" R="0" G="0" B="0"></Color></SolidColorBrush></BackgroundBrush>
+            <BorderBrush><SolidColorBrush><Color A="1" R="0.7" G="0.7" B="0.7"></Color></SolidColorBrush></BorderBrush>
+            <StrokeBrush><SolidColorBrush><Color A="1" R="0.7" G="0.7" B="0.7"></Color></SolidColorBrush></StrokeBrush>
+            <FillBrush><SolidColorBrush><Color A="0" R="0" G="0" B="0"></Color></SolidColorBrush></FillBrush>
+          </Brushes>
+          <Rotation>Rotation0</Rotation>
+          <OutlineThickness>1</OutlineThickness>
+          <IsOutlined>False</IsOutlined>
+          <BorderStyle>SolidLine</BorderStyle>
+          <IsVertical>False</IsVertical>
+          <ObjectLayout>
+            <DYMOPoint><X>0.22</X><Y>1.60</Y></DYMOPoint>
+            <Size><Width>3.65</Width><Height>0.01</Height></Size>
+          </ObjectLayout>
+        </LineObject>
         <TextObject>
           <Name>ReturnAddress</Name>
           <Brushes>
@@ -1585,8 +1603,8 @@ async function printDymoLabel(idx, btn) {
             ${addrSpan('Kippa Ring 4021 QLD', 9, false, '0.45')}
           </FormattedText>
           <ObjectLayout>
-            <DYMOPoint><X>2.42</X><Y>1.62</Y></DYMOPoint>
-            <Size><Width>1.45</Width><Height>0.42</Height></Size>
+            <DYMOPoint><X>2.32</X><Y>1.62</Y></DYMOPoint>
+            <Size><Width>1.55</Width><Height>0.44</Height></Size>
           </ObjectLayout>
         </TextObject>
       </LabelObjects>
