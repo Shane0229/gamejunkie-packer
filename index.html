@@ -1547,14 +1547,14 @@ async function printDymoLabel(idx, btn) {
             <HorizontalAlignment>Left</HorizontalAlignment>
             <VerticalAlignment>Middle</VerticalAlignment>
             <IsVertical>False</IsVertical>
-            ${addrSpan('TO:', 8, false, '0.5')}
-            ${addrSpan(name, 20, true, '0')}
+            ${addrSpan('TO:', 9, true, '0')}
+            ${addrSpan(name, 24, true, '0')}
             ${addr1 ? addrSpan(addr1, 16, false, '0') : ''}
             ${addr2 ? addrSpan(addr2, 16, false, '0') : ''}
           </FormattedText>
           <ObjectLayout>
             <DYMOPoint><X>0.22</X><Y>0.07</Y></DYMOPoint>
-            <Size><Width>3.65</Width><Height>1.65</Height></Size>
+            <Size><Width>3.65</Width><Height>1.55</Height></Size>
           </ObjectLayout>
         </TextObject>
         <TextObject>
@@ -1579,21 +1579,14 @@ async function printDymoLabel(idx, btn) {
             <HorizontalAlignment>Left</HorizontalAlignment>
             <VerticalAlignment>Bottom</VerticalAlignment>
             <IsVertical>False</IsVertical>
-            <LineTextSpan><TextSpan>
-              <Text>From: GameJunkie  13 Susan Ave  Kippa-Ring QLD 4021</Text>
-              <FontInfo>
-                <FontName>Arial</FontName>
-                <FontSize>6</FontSize>
-                <IsBold>False</IsBold>
-                <IsItalic>False</IsItalic>
-                <IsUnderline>False</IsUnderline>
-                <FontBrush><SolidColorBrush><Color A="1" R="0.55" G="0.55" B="0.55"></Color></SolidColorBrush></FontBrush>
-              </FontInfo>
-            </TextSpan></LineTextSpan>
+            ${addrSpan('From:', 9, false, '0.45')}
+            ${addrSpan('Game Junkie', 9, false, '0.45')}
+            ${addrSpan('13 Susan Ave', 9, false, '0.45')}
+            ${addrSpan('Kippa Ring 4021 QLD', 9, false, '0.45')}
           </FormattedText>
           <ObjectLayout>
-            <DYMOPoint><X>0.22</X><Y>1.75</Y></DYMOPoint>
-            <Size><Width>3.65</Width><Height>0.28</Height></Size>
+            <DYMOPoint><X>2.42</X><Y>1.62</Y></DYMOPoint>
+            <Size><Width>1.45</Width><Height>0.42</Height></Size>
           </ObjectLayout>
         </TextObject>
       </LabelObjects>
