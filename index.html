@@ -1039,6 +1039,15 @@ async function loadOrders() {
   fetchImages();
   fetchDaysToSell();
 
+  // Log to sales_log.csv
+  fetch(`${PROXY}/logorders`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ orders: allOrders })
+  }).then(r => r.json()).then(d => {
+    if (d.newRows > 0) console.log(`Sales log: ${d.newRows} new records saved to ${d.logFile}`);
+  }).catch(() => {});
+
   } catch(e) {
     showError('Failed to load orders: ' + e.message);
   }
@@ -1112,14 +1121,14 @@ async function fetchDaysToSell() {
     b.items.forEach((item, itemIdx) => {
       if (item.itemId && item.saleDate) {
         const cardIdx = b._idx;
-        items.push({ itemId: item.itemId, saleDate: item.saleDate, cardIdx, itemIdx });
+        items.push({ buyer: b, item, itemId: item.itemId, saleDate: item.saleDate, cardIdx, itemIdx });
       }
     });
   });
 
   for (let i = 0; i < items.length; i += 5) {
     const batch = items.slice(i, i + 5);
-    await Promise.all(batch.map(async ({ itemId, saleDate, cardIdx, itemIdx }) => {
+    await Promise.all(batch.map(async ({ buyer: b, item, itemId, saleDate, cardIdx, itemIdx }) => {
       try {
         const resp = await fetch(`${PROXY}/listing`, {
           method: 'POST',
@@ -1131,14 +1140,33 @@ async function fetchDaysToSell() {
           const start = new Date(data.startDate);
           const sale = new Date(saleDate);
           const days = Math.round((sale - start) / (1000 * 60 * 60 * 24));
+
+          // Store on item for logging
+          item.daysToSell = days;
+
+          // Update DOM
           const el = document.getElementById(`dts-${cardIdx}-${itemIdx}`);
-          if (el) {
-            el.textContent = days === 0 ? 'Sold day 1' : `Sold in ${days}d`;
-          }
+          if (el) el.textContent = days === 0 ? 'Sold day 1' : `Sold in ${days}d`;
+
+          // Update the sales log with days to sell
+          updateLogDaysToSell(item, days);
         }
       } catch(e) {}
     }));
   }
+}
+
+function updateLogDaysToSell(item, days) {
+  // Tell the proxy to update this item's days to sell in the log
+  fetch(`${PROXY}/logdaystosell`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      lineItemId: item.lineItemId,
+      orderId: item.orderId,
+      daysToSell: days
+    })
+  }).catch(() => {});
 }
 
 async function fetchImages() {
@@ -1463,25 +1491,21 @@ async function printDymoLabel(idx, btn) {
   const addr1 = b.addrLine1;
   const addr2 = b.addrLine2;
 
-  // Build Dymo XML label — 54mm x 101mm (S0722400 = Address label)
+  // Build Dymo XML label — 54mm x 101mm (S0722430)
+  // Two objects: large customer address (top 80%) + tiny return address (bottom)
   const xmlEsc = str => String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&apos;');
-  const fontInfo = (text) => `<TextSpan>
+
+  const addrSpan = (text, size, bold, grey) => `<LineTextSpan><TextSpan>
               <Text>${xmlEsc(text)}</Text>
               <FontInfo>
-                <FontName>Comic Sans MS</FontName>
-                <FontSize>20.9</FontSize>
-                <IsBold>True</IsBold>
+                <FontName>Arial</FontName>
+                <FontSize>${size}</FontSize>
+                <IsBold>${bold ? 'True' : 'False'}</IsBold>
                 <IsItalic>False</IsItalic>
                 <IsUnderline>False</IsUnderline>
-                <FontBrush>
-                  <SolidColorBrush>
-                    <Color A="1" R="0" G="0" B="0"></Color>
-                  </SolidColorBrush>
-                </FontBrush>
+                <FontBrush><SolidColorBrush><Color A="1" R="${grey}" G="${grey}" B="${grey}"></Color></SolidColorBrush></FontBrush>
               </FontInfo>
-            </TextSpan>`;
-
-  const makeLines = (...lines) => ['SEND TO:', ...lines].filter(Boolean).map(l => `<LineTextSpan>${fontInfo(l)}</LineTextSpan>`).join('\n');
+            </TextSpan></LineTextSpan>`;
 
   const labelXml = `<?xml version="1.0" encoding="utf-8"?>
 <DesktopLabel Version="1">
@@ -1495,16 +1519,14 @@ async function printDymoLabel(idx, btn) {
       <DYMOPoint><X>0.2133333</X><Y>0.06</Y></DYMOPoint>
       <Size><Width>3.696667</Width><Height>2.026667</Height></Size>
     </DYMORect>
-    <BorderColor>
-      <SolidColorBrush><Color A="1" R="0" G="0" B="0"></Color></SolidColorBrush>
-    </BorderColor>
+    <BorderColor><SolidColorBrush><Color A="1" R="0" G="0" B="0"></Color></SolidColorBrush></BorderColor>
     <BorderThickness>1</BorderThickness>
     <Show_Border>False</Show_Border>
     <DynamicLayoutManager>
       <RotationBehavior>ClearObjects</RotationBehavior>
       <LabelObjects>
         <TextObject>
-          <Name>ITextObject0</Name>
+          <Name>CustomerAddress</Name>
           <Brushes>
             <BackgroundBrush><SolidColorBrush><Color A="0" R="0" G="0" B="0"></Color></SolidColorBrush></BackgroundBrush>
             <BorderBrush><SolidColorBrush><Color A="1" R="0" G="0" B="0"></Color></SolidColorBrush></BorderBrush>
@@ -1525,11 +1547,53 @@ async function printDymoLabel(idx, btn) {
             <HorizontalAlignment>Left</HorizontalAlignment>
             <VerticalAlignment>Middle</VerticalAlignment>
             <IsVertical>False</IsVertical>
-            ${makeLines(name, addr1, addr2)}
+            ${addrSpan('TO:', 8, false, '0.5')}
+            ${addrSpan(name, 20, true, '0')}
+            ${addr1 ? addrSpan(addr1, 16, false, '0') : ''}
+            ${addr2 ? addrSpan(addr2, 16, false, '0') : ''}
           </FormattedText>
           <ObjectLayout>
-            <DYMOPoint><X>0.2233333</X><Y>0.07</Y></DYMOPoint>
-            <Size><Width>3.696667</Width><Height>2.020001</Height></Size>
+            <DYMOPoint><X>0.22</X><Y>0.07</Y></DYMOPoint>
+            <Size><Width>3.65</Width><Height>1.65</Height></Size>
+          </ObjectLayout>
+        </TextObject>
+        <TextObject>
+          <Name>ReturnAddress</Name>
+          <Brushes>
+            <BackgroundBrush><SolidColorBrush><Color A="0" R="0" G="0" B="0"></Color></SolidColorBrush></BackgroundBrush>
+            <BorderBrush><SolidColorBrush><Color A="1" R="0" G="0" B="0"></Color></SolidColorBrush></BorderBrush>
+            <StrokeBrush><SolidColorBrush><Color A="1" R="0" G="0" B="0"></Color></SolidColorBrush></StrokeBrush>
+            <FillBrush><SolidColorBrush><Color A="0" R="0" G="0" B="0"></Color></SolidColorBrush></FillBrush>
+          </Brushes>
+          <Rotation>Rotation0</Rotation>
+          <OutlineThickness>1</OutlineThickness>
+          <IsOutlined>False</IsOutlined>
+          <BorderStyle>SolidLine</BorderStyle>
+          <Margin><DYMOThickness Left="0" Top="0" Right="0" Bottom="0" /></Margin>
+          <HorizontalAlignment>Left</HorizontalAlignment>
+          <VerticalAlignment>Bottom</VerticalAlignment>
+          <FitMode>None</FitMode>
+          <IsVertical>False</IsVertical>
+          <FormattedText>
+            <FitMode>None</FitMode>
+            <HorizontalAlignment>Left</HorizontalAlignment>
+            <VerticalAlignment>Bottom</VerticalAlignment>
+            <IsVertical>False</IsVertical>
+            <LineTextSpan><TextSpan>
+              <Text>From: GameJunkie  13 Susan Ave  Kippa-Ring QLD 4021</Text>
+              <FontInfo>
+                <FontName>Arial</FontName>
+                <FontSize>6</FontSize>
+                <IsBold>False</IsBold>
+                <IsItalic>False</IsItalic>
+                <IsUnderline>False</IsUnderline>
+                <FontBrush><SolidColorBrush><Color A="1" R="0.55" G="0.55" B="0.55"></Color></SolidColorBrush></FontBrush>
+              </FontInfo>
+            </TextSpan></LineTextSpan>
+          </FormattedText>
+          <ObjectLayout>
+            <DYMOPoint><X>0.22</X><Y>1.75</Y></DYMOPoint>
+            <Size><Width>3.65</Width><Height>0.28</Height></Size>
           </ObjectLayout>
         </TextObject>
       </LabelObjects>
@@ -1810,6 +1874,13 @@ async function handleTrackingPDF(input) {
   btn.textContent = '⏳ Processing...';
 
   try {
+    // Refresh token before shipping to avoid 401s
+    const tokenOk = await refreshAccessToken();
+    if (!tokenOk) {
+      alert('Token refresh failed — please sign in again.');
+      btn.textContent = '📄 Upload Tracking PDF';
+      return;
+    }
     // Read PDF as base64
     const base64 = await new Promise((resolve, reject) => {
       const reader = new FileReader();
@@ -2371,7 +2442,7 @@ function buildAusPostCSV(shipments) {
       csvEsc(state),         // Deliver To State
       csvEsc(postcode),      // Deliver To Postcode
       csvEsc(b.phone || ''), // Deliver To Phone Number
-      csvEsc(email),          // Deliver To Email Address
+      csvEsc(b.email || ''), // Deliver To Email Address
       details.packagingType, // Item Packaging Type (e.g. AP_SATCHEL_S)
       'PP',                  // Item Delivery Service - Parcel Post
       (() => {
