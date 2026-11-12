@@ -1491,21 +1491,25 @@ async function printDymoLabel(idx, btn) {
   const addr1 = b.addrLine1;
   const addr2 = b.addrLine2;
 
-  // Build Dymo XML label — 54mm x 101mm (S0722430)
-  // Two objects: large customer address (top 80%) + tiny return address (bottom)
+  // Build Dymo XML label — 54mm x 101mm (S0722400 = Address label)
   const xmlEsc = str => String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&apos;');
-
-  const addrSpan = (text, size, bold, grey, underline = false) => `<LineTextSpan><TextSpan>
+  const fontInfo = (text) => `<TextSpan>
               <Text>${xmlEsc(text)}</Text>
               <FontInfo>
-                <FontName>Arial</FontName>
-                <FontSize>${size}</FontSize>
-                <IsBold>${bold ? 'True' : 'False'}</IsBold>
+                <FontName>Comic Sans MS</FontName>
+                <FontSize>20.9</FontSize>
+                <IsBold>True</IsBold>
                 <IsItalic>False</IsItalic>
-                <IsUnderline>${underline ? 'True' : 'False'}</IsUnderline>
-                <FontBrush><SolidColorBrush><Color A="1" R="${grey}" G="${grey}" B="${grey}"></Color></SolidColorBrush></FontBrush>
+                <IsUnderline>False</IsUnderline>
+                <FontBrush>
+                  <SolidColorBrush>
+                    <Color A="1" R="0" G="0" B="0"></Color>
+                  </SolidColorBrush>
+                </FontBrush>
               </FontInfo>
-            </TextSpan></LineTextSpan>`;
+            </TextSpan>`;
+
+  const makeLines = (...lines) => ['SEND TO:', ...lines].filter(Boolean).map(l => `<LineTextSpan>${fontInfo(l)}</LineTextSpan>`).join('\n');
 
   const labelXml = `<?xml version="1.0" encoding="utf-8"?>
 <DesktopLabel Version="1">
@@ -1519,14 +1523,16 @@ async function printDymoLabel(idx, btn) {
       <DYMOPoint><X>0.2133333</X><Y>0.06</Y></DYMOPoint>
       <Size><Width>3.696667</Width><Height>2.026667</Height></Size>
     </DYMORect>
-    <BorderColor><SolidColorBrush><Color A="1" R="0" G="0" B="0"></Color></SolidColorBrush></BorderColor>
+    <BorderColor>
+      <SolidColorBrush><Color A="1" R="0" G="0" B="0"></Color></SolidColorBrush>
+    </BorderColor>
     <BorderThickness>1</BorderThickness>
     <Show_Border>False</Show_Border>
     <DynamicLayoutManager>
       <RotationBehavior>ClearObjects</RotationBehavior>
       <LabelObjects>
         <TextObject>
-          <Name>CustomerAddress</Name>
+          <Name>ITextObject0</Name>
           <Brushes>
             <BackgroundBrush><SolidColorBrush><Color A="0" R="0" G="0" B="0"></Color></SolidColorBrush></BackgroundBrush>
             <BorderBrush><SolidColorBrush><Color A="1" R="0" G="0" B="0"></Color></SolidColorBrush></BorderBrush>
@@ -1547,46 +1553,11 @@ async function printDymoLabel(idx, btn) {
             <HorizontalAlignment>Left</HorizontalAlignment>
             <VerticalAlignment>Middle</VerticalAlignment>
             <IsVertical>False</IsVertical>
-            ${addrSpan('TO:', 8, true, '0')}
-            ${addrSpan(name, 18, true, '0')}
-            ${addr1 && !addr2 ? addrSpan(addr1, 14, false, '0', true) : addr1 ? addrSpan(addr1, 14, false, '0') : ''}
-            ${addr2 ? addrSpan(addr2, 14, false, '0', true) : ''}
+            ${makeLines(name, addr1, addr2)}
           </FormattedText>
           <ObjectLayout>
-            <DYMOPoint><X>0.22</X><Y>0.07</Y></DYMOPoint>
-            <Size><Width>3.65</Width><Height>1.50</Height></Size>
-          </ObjectLayout>
-        </TextObject>
-        <TextObject>
-          <Name>ReturnAddress</Name>
-          <Brushes>
-            <BackgroundBrush><SolidColorBrush><Color A="0" R="0" G="0" B="0"></Color></SolidColorBrush></BackgroundBrush>
-            <BorderBrush><SolidColorBrush><Color A="1" R="0" G="0" B="0"></Color></SolidColorBrush></BorderBrush>
-            <StrokeBrush><SolidColorBrush><Color A="1" R="0" G="0" B="0"></Color></SolidColorBrush></StrokeBrush>
-            <FillBrush><SolidColorBrush><Color A="0" R="0" G="0" B="0"></Color></SolidColorBrush></FillBrush>
-          </Brushes>
-          <Rotation>Rotation0</Rotation>
-          <OutlineThickness>1</OutlineThickness>
-          <IsOutlined>False</IsOutlined>
-          <BorderStyle>SolidLine</BorderStyle>
-          <Margin><DYMOThickness Left="0" Top="0" Right="0" Bottom="0" /></Margin>
-          <HorizontalAlignment>Left</HorizontalAlignment>
-          <VerticalAlignment>Bottom</VerticalAlignment>
-          <FitMode>None</FitMode>
-          <IsVertical>False</IsVertical>
-          <FormattedText>
-            <FitMode>None</FitMode>
-            <HorizontalAlignment>Left</HorizontalAlignment>
-            <VerticalAlignment>Bottom</VerticalAlignment>
-            <IsVertical>False</IsVertical>
-            ${addrSpan('From:', 9, false, '0.45')}
-            ${addrSpan('Game Junkie', 9, false, '0.45')}
-            ${addrSpan('13 Susan Ave', 9, false, '0.45')}
-            ${addrSpan('Kippa Ring 4021 QLD', 9, false, '0.45')}
-          </FormattedText>
-          <ObjectLayout>
-            <DYMOPoint><X>2.32</X><Y>1.62</Y></DYMOPoint>
-            <Size><Width>1.55</Width><Height>0.44</Height></Size>
+            <DYMOPoint><X>0.2233333</X><Y>0.07</Y></DYMOPoint>
+            <Size><Width>3.696667</Width><Height>2.020001</Height></Size>
           </ObjectLayout>
         </TextObject>
       </LabelObjects>
@@ -1867,13 +1838,6 @@ async function handleTrackingPDF(input) {
   btn.textContent = '⏳ Processing...';
 
   try {
-    // Refresh token before shipping to avoid 401s
-    const tokenOk = await refreshAccessToken();
-    if (!tokenOk) {
-      alert('Token refresh failed — please sign in again.');
-      btn.textContent = '📄 Upload Tracking PDF';
-      return;
-    }
     // Read PDF as base64
     const base64 = await new Promise((resolve, reject) => {
       const reader = new FileReader();
